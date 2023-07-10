@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" stylesheets="@view/LightThemeRoot.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.LineChartController">
+   <children>
+      <ToolBar prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+            <Button mnemonicParsing="false" onAction="#stopButtonPressed" text="STOP">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets></Button>
+            <Button mnemonicParsing="false" onAction="#startButtonPressed" text="START" />
+            <Label text="     " />
+            <Label text="Апертура: " />
+            <Label fx:id="apertureLabel" text="" />
+            <Label text="      " />
+            <Label text="Последнее значение: " />
+            <Label fx:id="lastValueLabel" text="" />
+            <Label text="                   " />
+            <Label text="Количество точек" />
+            <Slider fx:id="maxPointSlider" />
+            <Label fx:id="maxPointLabel" text="10" />
+        </items>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </ToolBar>
+      <LineChart fx:id="lineChart" layoutX="50.0" layoutY="-14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </children>
+</AnchorPane>

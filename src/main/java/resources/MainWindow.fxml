@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.TextFlow?>
+
+<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
+    <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <top>
+            <VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="65.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
+                <AnchorPane prefHeight="29.0" prefWidth="1050.0">
+                    <MenuBar fx:id="menuBar" layoutY="2.0" prefHeight="25.0" prefWidth="1050.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <Menu fx:id="fileMenu" mnemonicParsing="false" text="Меню">
+                            <MenuItem fx:id="openBDMenuItem" mnemonicParsing="false" text="Открыть БД" />
+                        </Menu>
+                        <Menu fx:id="toolsMenu" mnemonicParsing="false" text="Инструменты">
+                     </Menu>
+                        <Menu fx:id="docsMenu" mnemonicParsing="false" text="Документы">
+                        </Menu>
+                  <Menu mnemonicParsing="false" text="Вид">
+                     <items>
+                         <Menu mnemonicParsing="false" text="Тема">
+                             <items>
+                                <MenuItem fx:id="darkTheme" mnemonicParsing="false" text="Темная" />
+                                <MenuItem fx:id="lightTheme" mnemonicParsing="false" text="Светлая" />
+                             </items>
+                         </Menu>
+                     </items></Menu>
+                    </MenuBar>
+                </AnchorPane>
+                <ToolBar fx:id="topBar" prefHeight="40.0" prefWidth="200.0">
+                    <Label minWidth="60.0" prefWidth="60.0" text="IP адрес" />
+                    <TextField fx:id="ipField" minWidth="145.0" prefWidth="145.0" />
+                    <Label minWidth="30.0" prefWidth="30.0" text="Порт" />
+                    <TextField fx:id="portField" maxWidth="-Infinity" minWidth="80.0" prefWidth="80.0" />
+                    <Button defaultButton="true" minHeight="-Infinity" minWidth="85.0" mnemonicParsing="false" onAction="#startButtonClicked" prefWidth="60.0" text="Старт" />
+                    <Button minWidth="85.0" mnemonicParsing="false" onAction="#stopButtonClicked" prefWidth="60.0" text="Стоп" />
+                    <Button minWidth="80.0" mnemonicParsing="false" onAction="#pingIpAddress" prefWidth="60.0" text="Пинг" />
+                    <Button minWidth="150.0" mnemonicParsing="false" onAction="#clearDataTable" prefWidth="150.0" text="Очистить данные" />
+                    <Label minWidth="45.0" prefHeight="17.0" prefWidth="44.0" text="Мой IP:" />
+                    <TextField fx:id="myIpField" minWidth="110.0" prefHeight="25.0" prefWidth="137.0" text="IP" />
+                    <Button minWidth="110.0" mnemonicParsing="false" onAction="#changeLocalIp" prefHeight="25.0" prefWidth="71.0" text="Изменить" />
+                    <TextField fx:id="filterField" layoutY="1.0" prefHeight="25.0" prefWidth="198.0" promptText="Фильтр..." />
+                </ToolBar>
+            </VBox>
+        </top>
+        <left>
+            <AnchorPane prefHeight="200.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+                <TabPane layoutX="35.0" layoutY="35.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <Tab text="Настройки">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <Label layoutX="20.0" layoutY="23.0" text="ASDU адрес" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="23.0" />
+                            <TextField fx:id="asduField" layoutX="130.0" layoutY="20.0" prefHeight="25.0" prefWidth="150.0" text="1" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" />
+                            <Label layoutX="20.0" layoutY="53.0" text="Длина ASDU" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="53.0" />
+                            <ComboBox fx:id="asduLengthBox" layoutX="130.0" layoutY="50.0" prefWidth="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="50.0" />
+                            <Label layoutX="20.0" layoutY="83.0" text="Длина IOA" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="83.0" />
+                            <ComboBox fx:id="ioaLengthBox" layoutX="130.0" layoutY="80.0" prefWidth="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
+                            <Label layoutX="22.0" layoutY="145.0" text="t1" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="165.0" />
+                            <TextField fx:id="t1Field" layoutX="58.0" layoutY="142.0" prefHeight="25.0" prefWidth="30.0" text="15" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="162.0" />
+                            <Separator layoutX="20.0" layoutY="124.0" prefHeight="3.0" prefWidth="264.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" />
+                            <Label layoutX="89.0" layoutY="141.0" text="t2" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="165.0" />
+                            <TextField fx:id="t2Field" layoutX="115.0" layoutY="137.0" prefHeight="25.0" prefWidth="30.0" text="10" AnchorPane.leftAnchor="140.0" AnchorPane.topAnchor="162.0" />
+                            <Label layoutX="159.0" layoutY="140.0" text="t3" AnchorPane.rightAnchor="85.0" AnchorPane.topAnchor="165.0" />
+                            <TextField fx:id="t3Field" layoutX="181.0" layoutY="137.0" prefHeight="25.0" prefWidth="30.0" text="20" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="162.0" />
+                            <Label layoutX="41.0" layoutY="182.0" text="k" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="200.0" />
+                            <TextField fx:id="kField" layoutX="66.0" layoutY="178.0" prefHeight="25.0" prefWidth="30.0" text="12" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="197.0" />
+                            <Label layoutX="116.0" layoutY="182.0" text="w" AnchorPane.leftAnchor="126.0" AnchorPane.topAnchor="200.0" />
+                            <TextField fx:id="wField" layoutX="135.0" layoutY="177.0" prefHeight="25.0" prefWidth="30.0" text="8" AnchorPane.leftAnchor="140.0" AnchorPane.topAnchor="197.0" />
+                            <Separator layoutX="40.0" layoutY="218.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="243.0" />
+                            <Label layoutX="123.0" layoutY="135.0" prefHeight="15.0" prefWidth="65.0" text="Таймауты" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="135.0" />
+                        </AnchorPane>
+                    </Tab>
+                    <Tab text="Команды">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#giButtonClicked" text="Общий опрос" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" />
+                            <Separator layoutX="20.0" layoutY="57.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="65.0" />
+                            <Button layoutX="124.0" layoutY="80.0" mnemonicParsing="false" onAction="#clockSyncButton" text="Синхронизация времени" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="85.0" />
+                            <CheckBox fx:id="pcTimeBox" layoutX="20.0" layoutY="123.0" mnemonicParsing="false" text="Использовать время компьютера" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="120.0" />
+                            <DatePicker fx:id="datePicker" layoutX="13.0" layoutY="147.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="145.0" />
+                            <Label layoutX="130.0" layoutY="151.0" text="чч" AnchorPane.leftAnchor="130.0" AnchorPane.topAnchor="147.0" />
+                            <TextField fx:id="hourField" layoutX="150.0" layoutY="147.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="30.0" AnchorPane.leftAnchor="147.0" AnchorPane.topAnchor="145.0" />
+                            <Label layoutX="190.0" layoutY="151.0" text="мм" AnchorPane.leftAnchor="180.0" AnchorPane.topAnchor="147.0" />
+                            <TextField fx:id="minuteField" layoutX="212.0" layoutY="147.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="30.0" AnchorPane.leftAnchor="200.0" AnchorPane.topAnchor="145.0" />
+                            <Label layoutX="236.0" layoutY="151.0" text="сс" AnchorPane.leftAnchor="233.0" AnchorPane.topAnchor="147.0" />
+                            <TextField fx:id="secondField" layoutX="206.0" layoutY="147.0" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="30.0" AnchorPane.leftAnchor="250.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="145.0" />
+                            <Separator layoutX="50.0" layoutY="192.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="190.0" />
+                            <Label layoutX="20.0" layoutY="209.0" text="Адрес ТУ" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="213.0" />
+                            <TextField fx:id="tuAddressField" layoutX="126.0" layoutY="205.0" AnchorPane.leftAnchor="131.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="210.0" />
+                            <Button layoutX="136.0" layoutY="246.0" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#exeOnButton" prefWidth="120.0" text="EXE ВКЛЮЧИТЬ" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="246.0" />
+                            <Button layoutX="136.0" layoutY="273.0" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#exeOffButton" prefWidth="120.0" text="EXE ОТКЛЮЧИТЬ" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="280.0" />
+                            <Button layoutX="19.0" layoutY="246.0" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selOnButton" prefWidth="120.0" text="SEL ВКЛЮЧИТЬ" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="246.0" />
+                            <Button layoutX="19.0" layoutY="273.0" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selOffButton" prefWidth="120.0" text="SEL ОТКЛЮЧИТЬ" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="280.0" />
+                            <Separator layoutX="60.0" layoutY="328.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="325.0" />
+                        </AnchorPane>
+                    </Tab>
+                    <Tab text="Банк данных">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <Button layoutX="14.0" layoutY="96.0" mnemonicParsing="false" onAction="#openExcelFile" prefHeight="25.0" prefWidth="115.0" text="Открыть БД" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="95.0" />
+                            <CheckBox fx:id="getToDataBaseCheckBox" disable="true" layoutX="16.0" layoutY="152.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="131.0" text="Включить прием" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="140.0" />
+                            <Label fx:id="dataBaseName" layoutX="15.0" layoutY="181.0" prefHeight="17.0" prefWidth="270.0" text="Банк данных не загружен" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="175.0" />
+                            <Separator layoutX="15.0" layoutY="82.0" prefHeight="3.0" prefWidth="270.0" />
+                            <Label fx:id="substationNumberLabel" layoutX="14.0" layoutY="16.0">
+                                <font>
+                                    <Font name="System Bold" size="14.0" />
+                                </font>
+                            </Label>
+                            <Label fx:id="substationAddressLabel" layoutX="14.0" layoutY="43.0" />
+                            <Separator layoutX="14.0" layoutY="210.0" prefHeight="5.0" prefWidth="274.0" />
+                            <RadioButton fx:id="tsRadioButton" layoutX="83.0" layoutY="227.0" mnemonicParsing="false" text="ТС" />
+                            <RadioButton fx:id="tiRadioButton" layoutX="132.0" layoutY="227.0" mnemonicParsing="false" text="ТИ" />
+                            <RadioButton fx:id="tuRadioButton" layoutX="182.0" layoutY="227.0" mnemonicParsing="false" text="ТУ" />
+                            <Button fx:id="writeExcelButton" disable="true" layoutX="144.0" layoutY="96.0" mnemonicParsing="false" onAction="#writeExcel" prefHeight="25.0" prefWidth="137.0" text="Принять выделенные" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="95.0" />
+                            <Separator layoutX="13.0" layoutY="259.0" prefHeight="5.0" prefWidth="274.0" />
+                            <CheckBox fx:id="isInspectMode" disable="true" layoutX="171.0" layoutY="152.0" mnemonicParsing="false" text="Режим приемки" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="140.0" />
+                            <Button fx:id="protocolButton" disable="true" layoutX="20.0" layoutY="280.0" mnemonicParsing="false" onAction="#openProtocolWindow" text="Заполнить протокол" />
+                        </AnchorPane>
+                    </Tab>
+                </TabPane>
+            </AnchorPane>
+        </left>
+        <bottom>
+            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="80.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
+                <ScrollPane fx:id="consolePane" fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </padding>
+                    <TextFlow fx:id="textFlow" prefHeight="40.0" prefWidth="70.0" />
+                </ScrollPane>
+            </AnchorPane>
+        </bottom>
+        <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                <TabPane fx:id="dataTabPane" layoutX="150.0" layoutY="198.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <Tab text="Протокол">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <TableView fx:id="protocolTable" layoutX="70.0" layoutY="116.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <columns>
+                                    <TableColumn fx:id="protTimeColumn" maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="94.0" text="Время" />
+                                    <TableColumn fx:id="protTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="95.0" text="Тип кадра" />
+                                    <TableColumn fx:id="protCauseColumn" maxWidth="1.7976931348623157E308" minWidth="160.0" prefWidth="123.0" text="Причина передачи" />
+                                    <TableColumn fx:id="protAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="53.0" text="ASDU" />
+                                    <TableColumn fx:id="protAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="65.0" text="Адрес" />
+                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="84.0" text="Значение" />
+                                    <TableColumn fx:id="protQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="112.0" text="Качество" />
+                                    <TableColumn fx:id="protTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="138.0" text="Метка времени" />
+                                </columns>
+                        <opaqueInsets>
+                           <Insets />
+                        </opaqueInsets>
+                            </TableView>
+                        </AnchorPane>
+                    </Tab>
+                    <Tab fx:id="dataTab" text="Данные">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <TableView fx:id="staticTable" layoutX="64.0" layoutY="69.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <columns>
+                                    <TableColumn fx:id="staticAsduColumn" prefWidth="46.0" text="ASDU" />
+                                    <TableColumn fx:id="staticAddressColumn" prefWidth="61.0" text="Адрес" />
+                                    <TableColumn fx:id="staticNameColumn" prefWidth="96.0" text="Наименование" />
+                                    <TableColumn fx:id="staticTypeColumn" prefWidth="67.0" text="Тип кадра" />
+                                    <TableColumn fx:id="staticCauseColumn" prefWidth="121.0" text="Причина передачи" />
+                                    <TableColumn fx:id="staticValueColumn" prefWidth="68.0" text="Значение" />
+                                    <TableColumn fx:id="staticQualityColumn" prefWidth="64.0" text="Качество" />
+                                    <TableColumn fx:id="staticTimeColumn" prefWidth="101.0" text="Метка времени" />
+                                    <TableColumn fx:id="staticClientTimeColumn" prefWidth="154.0" text="Время клиента" />
+                                </columns>
+                        <opaqueInsets>
+                           <Insets />
+                        </opaqueInsets>
+                            </TableView>
+                        </AnchorPane>
+                    </Tab>
+                    <Tab fx:id="dataBaseTab" text="Банк данных">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <TableView fx:id="dataBaseTable" editable="true" layoutX="126.0" layoutY="68.0" onSwipeLeft="#swipeListLeft" onSwipeRight="#swipeListRight" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <columns>
+                                    <TableColumn fx:id="dataNameParamColumn" maxWidth="1.7976931348623157E308" minWidth="220.0" prefWidth="286.6666564941406" text="Наименование параметра" />
+                                    <TableColumn fx:id="dataIoaColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="65.33331298828125" text="Адрес" />
+                                    <TableColumn fx:id="dataValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="119.33331298828125" text="Значение" />
+                                    <TableColumn fx:id="dataQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="106.66668701171875" text="Качество" />
+                                    <TableColumn fx:id="dataCheckColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="125.33331298828125" text="Отметка о приеме" />
+                                    <TableColumn prefWidth="75.0" />
+                                </columns>
+                            </TableView>
+                        </AnchorPane>
+                    </Tab>
+                </TabPane>
+            </AnchorPane>
+        </center>
+    </BorderPane>
+</AnchorPane>
