@@ -19,7 +19,7 @@ public class Gui extends Application {
     }
 
     public void showMainWindow() {
-        if (LocalDate.now().getYear() <= 2023 & LocalDate.now().getMonthValue() <= 12) {
+        if (LocalDate.now().getYear() <= 2030) {
             try {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/MainWindow.fxml"));
