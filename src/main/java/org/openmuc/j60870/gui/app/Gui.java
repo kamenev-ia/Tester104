@@ -5,12 +5,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.openmuc.j60870.gui.utilities.License;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 public class Gui extends Application {
     public Stage mainStage;
+    private final License license = new License();
 
     @Override
     public void start(Stage startStage) {
@@ -19,7 +20,7 @@ public class Gui extends Application {
     }
 
     public void showMainWindow() {
-        if (LocalDate.now().getYear() <= 2030) {
+        if (license.isLicenseStatus()) {
             try {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/MainWindow.fxml"));
