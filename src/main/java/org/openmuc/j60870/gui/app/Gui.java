@@ -11,7 +11,8 @@ import java.io.IOException;
 
 public class Gui extends Application {
     public Stage mainStage;
-    public License license;
+    private final License license = new License();
+
     @Override
     public void start(Stage startStage) {
         this.mainStage = startStage;
