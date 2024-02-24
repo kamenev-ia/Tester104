@@ -46,6 +46,11 @@
                              </items>
                          </Menu>
                      </items></Menu>
+                  <Menu mnemonicParsing="false" text="Справка">
+                    <items>
+                      <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="О программе" />
+                    </items>
+                  </Menu>
                     </MenuBar>
                 </AnchorPane>
                 <ToolBar fx:id="topBar" prefHeight="40.0" prefWidth="200.0">
@@ -53,7 +58,7 @@
                     <TextField fx:id="ipField" minWidth="145.0" prefWidth="145.0" />
                     <Label minWidth="30.0" prefWidth="30.0" text="Порт" />
                     <TextField fx:id="portField" maxWidth="-Infinity" minWidth="80.0" prefWidth="80.0" />
-                    <Button defaultButton="true" minHeight="-Infinity" minWidth="85.0" mnemonicParsing="false" onAction="#startButtonClicked" prefWidth="60.0" text="Старт" />
+                    <Button fx:id="startButton" defaultButton="true" minHeight="-Infinity" minWidth="85.0" mnemonicParsing="false" onAction="#startButtonClicked" prefWidth="60.0" text="Старт" />
                     <Button minWidth="85.0" mnemonicParsing="false" onAction="#stopButtonClicked" prefWidth="60.0" text="Стоп" />
                     <Button minWidth="80.0" mnemonicParsing="false" onAction="#pingIpAddress" prefWidth="60.0" text="Пинг" />
                     <Button minWidth="150.0" mnemonicParsing="false" onAction="#clearDataTable" prefWidth="150.0" text="Очистить данные" />
@@ -131,20 +136,23 @@
                             <RadioButton fx:id="tuRadioButton" layoutX="182.0" layoutY="227.0" mnemonicParsing="false" text="ТУ" />
                             <Button fx:id="writeExcelButton" disable="true" layoutX="144.0" layoutY="96.0" mnemonicParsing="false" onAction="#writeExcel" prefHeight="25.0" prefWidth="137.0" text="Принять выделенные" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="95.0" />
                             <Separator layoutX="13.0" layoutY="259.0" prefHeight="5.0" prefWidth="274.0" />
-                            <CheckBox fx:id="isInspectMode" disable="true" layoutX="171.0" layoutY="152.0" mnemonicParsing="false" text="Режим приемки" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="140.0" />
                             <Button fx:id="protocolButton" disable="true" layoutX="20.0" layoutY="280.0" mnemonicParsing="false" onAction="#openProtocolWindow" text="Заполнить протокол" />
+                            <Button layoutX="20.0" layoutY="318.0" mnemonicParsing="false" onAction="#downloadDataBaseTemplate" prefHeight="25.0" prefWidth="129.0" text="Скачать шаблон БД" />
                         </AnchorPane>
                     </Tab>
                 </TabPane>
             </AnchorPane>
         </left>
         <bottom>
-            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="80.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
-                <ScrollPane fx:id="consolePane" fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="100.0" prefWidth="1920.0" BorderPane.alignment="CENTER">
+                <ScrollPane fx:id="consolePane" fitToHeight="true" fitToWidth="true" layoutY="235.0" prefHeight="100.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </padding>
-                    <TextFlow fx:id="textFlow" prefHeight="40.0" prefWidth="70.0" />
+                    <TextFlow fx:id="consoleTextFlow">
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets></TextFlow>
                 </ScrollPane>
             </AnchorPane>
         </bottom>
@@ -194,7 +202,7 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <TableView fx:id="dataBaseTable" editable="true" layoutX="126.0" layoutY="68.0" onSwipeLeft="#swipeListLeft" onSwipeRight="#swipeListRight" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="dataNameParamColumn" maxWidth="1.7976931348623157E308" minWidth="220.0" prefWidth="286.6666564941406" text="Наименование параметра" />
+                                    <TableColumn fx:id="dataNameParamColumn" maxWidth="1.7976931348623157E308" minWidth="220.0" prefWidth="-1.0" text="Наименование параметра" />
                                     <TableColumn fx:id="dataIoaColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="65.33331298828125" text="Адрес" />
                                     <TableColumn fx:id="dataValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="119.33331298828125" text="Значение" />
                                     <TableColumn fx:id="dataQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="106.66668701171875" text="Качество" />

@@ -21,10 +21,7 @@
 package org.openmuc.j60870;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -155,7 +152,11 @@ public class ClientConnectionBuilder extends CommonBuilder<ClientConnectionBuild
         if (localAddr != null) {
             socket.bind(new InetSocketAddress(localAddr, localPort));
         }
-        socket.connect(new InetSocketAddress(address, port), settings.getConnectionTimeout());
+        try {
+            socket.connect(new InetSocketAddress(address, port), settings.getConnectionTimeout());
+        } catch (Exception exception) {
+            return null;
+        }
         return new Connection(socket, null, new ConnectionSettings(settings));
     }
 

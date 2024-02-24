@@ -1,5 +1,6 @@
 package org.openmuc.j60870.gui.utilities;
 
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -15,35 +16,47 @@ public class ConsolePrinter {
 
 
     public void printInfoMessage(ObservableList list, String string) {
-        try {
-            Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
-            text.setFill(INFO_COLOR);
-            list.addAll(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
+                    text.setFill(INFO_COLOR);
+                    list.addAll(text);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void printErrorMessage(ObservableList list, String string) {
-        try {
-            Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
-            text.setFill(ERROR_COLOR);
-            list.addAll(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
+                    text.setFill(ERROR_COLOR);
+                    list.addAll(text);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void printSuccessMessage(ObservableList list, String string) {
-        try {
-            Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
-            text.setFill(SUCCESS_COLOR);
-            list.addAll(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Text text = new Text(asduDate.getAsduDate() + " ________ " + string + "\n");
+                    text.setFill(SUCCESS_COLOR);
+                    list.addAll(text);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }

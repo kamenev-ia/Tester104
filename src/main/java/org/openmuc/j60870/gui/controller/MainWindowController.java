@@ -37,6 +37,7 @@ import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
 import org.openmuc.j60870.gui.model.SubstationParamModel;
 import org.openmuc.j60870.gui.utilities.ConsolePrinter;
+import org.openmuc.j60870.gui.utilities.FileManager;
 import org.openmuc.j60870.gui.utilities.UtilNet;
 import org.openmuc.j60870.gui.utilities.Validator;
 import org.openmuc.j60870.ie.IeTime56;
@@ -65,9 +66,9 @@ public class MainWindowController {
     @FXML
     private ComboBox<String> asduLengthBox, ioaLengthBox;
     @FXML
-    private Button writeExcelButton, protocolButton;
+    private Button writeExcelButton, protocolButton, startButton;
     @FXML
-    private CheckBox pcTimeBox, getToDataBaseCheckBox, isInspectMode;
+    private CheckBox pcTimeBox, getToDataBaseCheckBox;
     @FXML
     private DatePicker datePicker;
     @FXML
@@ -93,9 +94,9 @@ public class MainWindowController {
     @FXML
     private Menu fileMenu, toolsMenu, docsMenu;
     @FXML
-    private MenuItem openBDMenuItem, darkTheme, lightTheme;
+    private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem;
     @FXML
-    private TextFlow textFlow;
+    private TextFlow consoleTextFlow;
     @FXML
     private ScrollPane consolePane;
     @FXML
@@ -106,6 +107,7 @@ public class MainWindowController {
     public boolean isGetToChart;
     public ObservableList<DataModel> dataBaseData = FXCollections.observableArrayList();
     public ObservableList<ObservableList> dataBaseList = FXCollections.observableArrayList();
+    public String defaultStyleIpField;
 
     public final ToggleGroup dataBaseListSelectGroup = new ToggleGroup();
 
@@ -138,7 +140,7 @@ public class MainWindowController {
         dataBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         staticTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        String styleIpField = ipField.getStyle();
+        defaultStyleIpField = ipField.getStyle();
         ipField.focusedProperty().addListener((ov, oldV, newV) -> {
             if (!newV) {
                 if (!validator.validateIpAddress(ipField.getText())) {
@@ -146,7 +148,7 @@ public class MainWindowController {
                     printConsoleErrorMessage("Некорректное значение в поле IP адреса");
                 }
             } else {
-                ipField.setStyle(styleIpField);
+                ipFieldResetStyle();
             }
         });
         String stylePortField = portField.getStyle();
@@ -161,11 +163,11 @@ public class MainWindowController {
             }
         });
 
-        textFlow.getChildren().addListener(
+        consoleTextFlow.getChildren().addListener(
                 (ListChangeListener<? super Node>) ((change) -> {
-                    textFlow.requestLayout();
+                    consoleTextFlow.requestLayout();
                     consolePane.requestLayout();
-                    consolePane.setVvalue(1.0f);
+                    consolePane.setVvalue(consolePane.getVmax());
                 })
         );
 
@@ -201,10 +203,96 @@ public class MainWindowController {
 
         dataCheckColumn.setStyle("-fx-alignment: CENTER;");
         openBDMenuItem.setOnAction(event -> openExcelFile());
+        aboutMenuItem.setOnAction(event -> openAboutWindow());
 
         //Смена темы оформления
         darkTheme.setOnAction(event -> switchTheme("/view/DarkThemeRoot.css"));
         lightTheme.setOnAction(event -> switchTheme("/view/LightThemeRoot.css"));
+    }
+
+    private TextFieldTableCell<ProtocolDataModel, String> setValueColumnStyle() {
+        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+        cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+            cell.setStyle("-fx-background-color: transparent");
+            if (newItem != null) {
+                switch (newItem) {
+                    case "ON":
+                        cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
+                        break;
+                    case "OFF":
+                        cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
+                        break;
+                    case "INDETERMINATE_OR_INTERMEDIATE":
+                    case "INDETERMINATE":
+                        cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
+                        break;
+                    default:
+                        cell.setStyle("-fx-background-color: transparent");
+                }
+            }
+        });
+        return cell;
+    }
+
+    private TextFieldTableCell<ProtocolDataModel, String> setAnimatedValueColumnStyle() {
+        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+        cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+            cell.setStyle("-fx-background-color: transparent");
+            if (newItem != null) {
+                cell.getStyleClass().add("animated-gradient");
+                ObjectProperty<Color> baseColor = new SimpleObjectProperty<>();
+                KeyValue kv1 = new KeyValue(baseColor, Color.rgb(200, 40, 0));
+                KeyValue kv2 = new KeyValue(baseColor, Color.rgb(40, 200, 0));
+                KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
+                KeyFrame kf2 = new KeyFrame(Duration.millis(500), kv2);
+                Timeline timeline = new Timeline(kf1, kf2);
+                baseColor.addListener((ob, oldColor, newColor) -> cell.setStyle(String.format("-gradient-base: #%02x%02x%02x; ",
+                        (int)(newColor.getRed()*255),
+                        (int)(newColor.getGreen()*255),
+                        (int)(newColor.getBlue()*255))));
+                timeline.setAutoReverse(true);
+                timeline.setCycleCount(5);
+                timeline.play();
+                timeline.setOnFinished(e -> {
+                    switch (newItem) {
+                        case "ON":
+                            cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
+                            break;
+                        case "OFF":
+                            cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
+                            break;
+                        case "INDETERMINATE_OR_INTERMEDIATE":
+                        case "INDETERMINATE":
+                            cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
+                            break;
+                        default:
+                            cell.setStyle("-fx-background-color: transparent");
+                    }
+                });
+            }
+        });
+        return cell;
+    }
+
+    private TextFieldTableCell<ProtocolDataModel, String> setQualityColumnStyle() {
+        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+        cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+            cell.setStyle("-fx-background-color: transparent");
+            if (newItem != null) {
+                switch (newItem) {
+                    case "BL (блокировка) ":
+                    case "SB (замещение) ":
+                    case "NT (неактуальное) ":
+                    case "IV (недействительное) ":
+                        cell.setStyle("-fx-background-color: rgba(0, 100, 200, 0.6) ;");
+                        break;
+                    default:
+                        cell.setStyle("-fx-background-color: transparent");
+                        break;
+                }
+            }
+        });
+        return cell;
     }
 
     public void initialize(ObservableList<ProtocolDataModel> dataModelObservableList) {
@@ -215,50 +303,9 @@ public class MainWindowController {
             protAsduColumn.setCellValueFactory(cellData -> cellData.getValue().protAsduProperty().asObject());
             protAddressColumn.setCellValueFactory(cellData -> cellData.getValue().protAddressProperty().asObject());
             protValueColumn.setCellValueFactory(cellData -> cellData.getValue().protValueProperty());
-            protValueColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        switch (newItem) {
-                            case "ON":
-                                cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
-                                break;
-                            case "OFF":
-                                cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
-                                break;
-                            case "INDETERMINATE_OR_INTERMEDIATE":
-                            case "INDETERMINATE":
-                                cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
-                                break;
-                            default:
-                                cell.setStyle("-fx-background-color: transparent");
-                        }
-                    }
-                });
-                return cell;
-            });
+            protValueColumn.setCellFactory(tc-> setValueColumnStyle());
             protQualityColumn.setCellValueFactory(cellData -> cellData.getValue().protQualityProperty());
-            protQualityColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        switch (newItem) {
-                            case "BL (блокировка) ":
-                            case "SB (замещение) ":
-                            case "NT (неактуальное) ":
-                            case "IV (недействительное) ":
-                                cell.setStyle("-fx-background-color: rgba(0, 100, 200, 0.6) ;");
-                                break;
-                            default:
-                                cell.setStyle("-fx-background-color: transparent");
-                                break;
-                        }
-                    }
-                });
-                return cell;
-            });
+            protQualityColumn.setCellFactory(tc->setQualityColumnStyle());
             protTimeTagColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeTagProperty());
 
             FilteredList<ProtocolDataModel> filteredList = new FilteredList<>(dataModelObservableList, p -> true);
@@ -276,7 +323,7 @@ public class MainWindowController {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        addContextMenu();
+        protocolTable.setContextMenu(tiContextMenu(protocolTable));
     }
 
     public void initStaticData(ObservableList<ProtocolDataModel> dataModelObservableList) {
@@ -287,57 +334,16 @@ public class MainWindowController {
             staticTypeColumn.setCellValueFactory(cellData -> cellData.getValue().protTypeProperty());
             staticCauseColumn.setCellValueFactory(cellData -> cellData.getValue().protCauseProperty());
             staticValueColumn.setCellValueFactory(cellData -> cellData.getValue().protValueProperty());
-            staticValueColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        switch (newItem) {
-                            case "ON":
-                                cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
-                                break;
-                            case "OFF":
-                                cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
-                                break;
-                            case "INDETERMINATE_OR_INTERMEDIATE":
-                            case "INDETERMINATE":
-                                cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
-                                break;
-                            default:
-                                cell.setStyle("-fx-background-color: transparent");
-                        }
-                    }
-                });
-                return cell;
-            });
+            staticValueColumn.setCellFactory(tc->setValueColumnStyle());
             staticQualityColumn.setCellValueFactory(cellData -> cellData.getValue().protQualityProperty());
-            staticQualityColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        switch (newItem) {
-                            case "BL (блокировка) ":
-                            case "SB (замещение) ":
-                            case "NT (неактуальное) ":
-                            case "IV (недействительное) ":
-                                cell.setStyle("-fx-background-color: rgba(0, 100, 200, 0.6) ;");
-                                break;
-                            default:
-                                cell.setStyle("-fx-background-color: transparent");
-                                break;
-                        }
-                    }
-                });
-                return cell;
-            });
+            staticQualityColumn.setCellFactory(tc->setQualityColumnStyle());
             staticTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeTagProperty());
             staticClientTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeProperty());
             staticTable.setItems(dataModelObservableList);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        addContextMenu();
+        protocolTable.setContextMenu(tiContextMenu(protocolTable));
     }
 
     public void initSingleStaticData(ObservableList<ProtocolDataModel> dataModelObservableList) {
@@ -348,73 +354,16 @@ public class MainWindowController {
             staticTypeColumn.setCellValueFactory(cellData -> cellData.getValue().protTypeProperty());
             staticCauseColumn.setCellValueFactory(cellData -> cellData.getValue().protCauseProperty());
             staticValueColumn.setCellValueFactory(cellData -> cellData.getValue().protValueProperty());
-            staticValueColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        cell.getStyleClass().add("animated-gradient");
-                        ObjectProperty<Color> baseColor = new SimpleObjectProperty<>();
-                        KeyValue kv1 = new KeyValue(baseColor, Color.rgb(200, 40, 0));
-                        KeyValue kv2 = new KeyValue(baseColor, Color.rgb(40, 200, 0));
-                        KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
-                        KeyFrame kf2 = new KeyFrame(Duration.millis(500), kv2);
-                        Timeline timeline = new Timeline(kf1, kf2);
-                        baseColor.addListener((ob, oldColor, newColor) -> cell.setStyle(String.format("-gradient-base: #%02x%02x%02x; ",
-                                (int)(newColor.getRed()*255),
-                                (int)(newColor.getGreen()*255),
-                                (int)(newColor.getBlue()*255))));
-                        timeline.setAutoReverse(true);
-                        timeline.setCycleCount(5);
-                        timeline.play();
-                        timeline.setOnFinished(e -> {
-                            switch (newItem) {
-                                case "ON":
-                                    cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
-                                    break;
-                                case "OFF":
-                                    cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
-                                    break;
-                                case "INDETERMINATE_OR_INTERMEDIATE":
-                                case "INDETERMINATE":
-                                    cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
-                                    break;
-                                default:
-                                    cell.setStyle("-fx-background-color: transparent");
-                            }
-                        });
-                    }
-                });
-                return cell;
-            });
+            staticValueColumn.setCellFactory(tc->setAnimatedValueColumnStyle());
             staticQualityColumn.setCellValueFactory(cellData -> cellData.getValue().protQualityProperty());
-            staticQualityColumn.setCellFactory(tc->{
-                TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
-                cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                    cell.setStyle("-fx-background-color: transparent");
-                    if (newItem != null) {
-                        switch (newItem) {
-                            case "BL (блокировка) ":
-                            case "SB (замещение) ":
-                            case "NT (неактуальное) ":
-                            case "IV (недействительное) ":
-                                cell.setStyle("-fx-background-color: rgba(0, 100, 200, 0.6) ;");
-                                break;
-                            default:
-                                cell.setStyle("-fx-background-color: transparent");
-                                break;
-                        }
-                    }
-                });
-                return cell;
-            });
+            staticQualityColumn.setCellFactory(tc->setQualityColumnStyle());
             staticTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeTagProperty());
             staticClientTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeProperty());
             staticTable.setItems(dataModelObservableList);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        addContextMenu();
+        protocolTable.setContextMenu(tiContextMenu(protocolTable));
     }
 
     public void initDataBase(ObservableList<DataModel> dataModelObservableList) {
@@ -457,13 +406,27 @@ public class MainWindowController {
             if (!portField.getText().equals("")) {
                 int portServer = Integer.parseInt(portField.getText());
                 printConsoleInfoMessage("Подключение к " + ipServer + ":" + portServer);
-                startClient(ipServer, portServer);
+                if (isHostAvailable(ipServer, portServer)) {
+                    startClient(ipServer, portServer);
+                } else {
+                    printConsoleErrorMessage("Указанный сервер не доступпен");
+                }
             } else {
                 printConsoleErrorMessage("Не указан порт");
             }
         } else {
             printConsoleErrorMessage("Не указан IP адрес");
         }
+    }
+
+    private static boolean isHostAvailable(String ip, int port){
+        try (Socket s = new Socket(ip, port)) {
+            s.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @FXML
@@ -477,23 +440,25 @@ public class MainWindowController {
     public void openExcelFile() {
         excelConverter = new ExcelConverter(this);
         dataBaseList = excelConverter.openFile();
-        this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
-        if (dataBaseData != null) {
+
+        if (dataBaseList != null) {
+            this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
             tsRadioButton.setDisable(false);
             tiRadioButton.setDisable(false);
+            tuRadioButton.setDisable(false);
             getToDataBaseCheckBox.setDisable(false);
             writeExcelButton.setDisable(false);
             protocolButton.setDisable(false);
-//            Режим приемки пока не реализован
-//            isInspectMode.setDisable(false);
+            initDataBase(dataBaseList.get(0));
+            dataBaseTable.setItems(dataBaseList.get(0));
+        } else {
+            this.dataBaseName.setText("Невозможно открыть файл");
         }
-        initDataBase(dataBaseList.get(0));
-        dataBaseTable.setItems(dataBaseList.get(0));
     }
 
     @FXML
     public void writeExcel() {
-        excelConverter.fillExcel(dataBaseList);
+        excelConverter.fillOutputBDFile(dataBaseList);
     }
 
     @FXML
@@ -563,6 +528,14 @@ public class MainWindowController {
         client104.closeConnection();
     }
 
+    public void setIpFieldStyle(boolean connectionStatus) {
+        if (connectionStatus) {
+            ipField.setStyle("-fx-background-color: #336600");
+        } else {
+            ipField.setStyle("-fx-background-color: derive(#373e43, 35%)");
+        }
+    }
+
     public void startClient(String ip, int port) {
         ClientConnectionBuilder clientConnectionBuilder = null;
         commonAddressParam = Integer.parseInt(asduField.getText());
@@ -594,10 +567,14 @@ public class MainWindowController {
         }
     }
 
+    public void ipFieldResetStyle() {
+        ipField.setStyle(defaultStyleIpField);
+    }
+
     //Вывод информационного сообщения в консоль
     public void printConsoleInfoMessage(String... strings) {
         for (String string : strings) {
-            ObservableList<? extends Node> list = textFlow.getChildren();
+            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
             consolePrinter.printInfoMessage(list, string);
         }
     }
@@ -605,7 +582,7 @@ public class MainWindowController {
     //Вывод сообщения об ошибке в консоль
     public void printConsoleErrorMessage(String... strings) {
         for (String string : strings) {
-            ObservableList<? extends Node> list = textFlow.getChildren();
+            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
             consolePrinter.printErrorMessage(list, string);
         }
     }
@@ -613,7 +590,7 @@ public class MainWindowController {
     //Вывод сообщения об успешной операции в консоль
     public void printConsoleSuccessMessage(String... strings) {
         for (String string : strings) {
-            ObservableList<? extends Node> list = textFlow.getChildren();
+            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
             consolePrinter.printSuccessMessage(list, string);
         }
     }
@@ -641,12 +618,15 @@ public class MainWindowController {
             if (dataBaseListSelectGroup.getSelectedToggle().equals(tsRadioButton)) {
                 indexListDataBase = 0;
                 initDataBase(dataBaseList.get(0));
+                dataBaseTable.setContextMenu(null);
             } else if (dataBaseListSelectGroup.getSelectedToggle().equals(tiRadioButton)) {
                 initDataBase(dataBaseList.get(1));
                 indexListDataBase = 1;
-            } else {
-                initDataBase(dataBaseList.get(1));
+                dataBaseTable.setContextMenu(tiContextMenu(dataBaseTable));
+            } else if (dataBaseListSelectGroup.getSelectedToggle().equals(tuRadioButton)){
+                initDataBase(dataBaseList.get(2));
                 indexListDataBase = 2;
+                dataBaseTable.setContextMenu(tuContextMenu());
             }
         });
     }
@@ -654,7 +634,7 @@ public class MainWindowController {
     //Обработка свайпа влево. Смена листов БД (ТС <-> ТИ)
     @FXML
     private void swipeListLeft() {
-        if (indexListDataBase < 1) {
+        if (indexListDataBase < 2) {
             indexListDataBase = indexListDataBase + 1;
             initDataBase(dataBaseList.get(indexListDataBase));
             setSelectedToggle(indexListDataBase);
@@ -698,34 +678,83 @@ public class MainWindowController {
         }
     }
 
-    private void addContextMenu() {
+    private ContextMenu tiContextMenu(TableView tableView) {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem openLineChartMenuItem = new MenuItem("Открыть график");
         MenuItem openRealTimeLineChartMenuItem = new MenuItem("Открыть RealTime график");
         openLineChartMenuItem.setOnAction(event -> {
             this.isGetToChart = true;
-            startLineChart();
+            startLineChart(tableView);
             if (lineChartController != null) {
                 Platform.runLater(()->lineChartController.addLineChartPoint());
             }
         });
         openRealTimeLineChartMenuItem.setOnAction(event -> {
             this.isGetToChart = true;
-            startLineChart();
+            startLineChart(tableView);
             if (lineChartController != null) {
                 lineChartController.setIsRealTimeChart(true);
                 Platform.runLater(()->lineChartController.realTimeChart());
             }
         });
         contextMenu.getItems().addAll(openLineChartMenuItem, openRealTimeLineChartMenuItem);
-        protocolTable.setContextMenu(contextMenu);
+        return contextMenu;
+    }
+
+    private ContextMenu tuContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem onMenuItem = new MenuItem("Включить");
+        MenuItem offMenuItem = new MenuItem("Отключить");
+        onMenuItem.setOnAction(event -> {
+            client104.sendTuCommand(commonAddressParam, dataBaseTable.getSelectionModel().getSelectedItem().getIoa(), true, true);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            client104.sendTuCommand(commonAddressParam, dataBaseTable.getSelectionModel().getSelectedItem().getIoa(), false, true);
+        });
+        offMenuItem.setOnAction(event -> {
+            client104.sendTuCommand(commonAddressParam, dataBaseTable.getSelectionModel().getSelectedItem().getIoa(), true, false);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            client104.sendTuCommand(commonAddressParam, dataBaseTable.getSelectionModel().getSelectedItem().getIoa(), false, false);
+        });
+        contextMenu.getItems().addAll(onMenuItem, offMenuItem);
+        return contextMenu;
     }
 
     private Double oldValue = 0.0;
 
-    private void startLineChart() {
-        if (protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("36 (Measured value, short floating point number with time tag CP56Time2a)") || protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("13 (Measured value, short floating point number)")) {
-            analogAddressForChart = protocolTable.getSelectionModel().getSelectedItem().getProtAddress();
+    private void startLineChart(TableView tableView) {
+        if (tableView.equals(protocolTable)) {
+            if (protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("36 (Measured value, short floating point number with time tag CP56Time2a)") || protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("13 (Measured value, short floating point number)")) {
+                analogAddressForChart = protocolTable.getSelectionModel().getSelectedItem().getProtAddress();
+                try {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(getClass().getResource("/LineChart.fxml"));
+                    AnchorPane baseAppPane = loader.load();
+                    Stage lineChartStage = new Stage();
+                    Scene scene = new Scene(baseAppPane);
+                    lineChartStage.setScene(scene);
+                    lineChartStage.setResizable(true);
+                    lineChartController = loader.getController();
+                    lineChartController.setTitle(analogAddressForChart);
+                    lineChartController.setMvc(this);
+                    scene.getStylesheets().add(mainPane.getScene().getStylesheets().get(0));
+                    lineChartStage.show();
+                    lineChartStage.setOnCloseRequest(lineChartController.getCloseEventHandler());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                printConsoleInfoMessage("Просмотр графика доступен только для аналоговых значений");
+            }
+        } else {
+            analogAddressForChart = dataBaseTable.getSelectionModel().getSelectedItem().getIoa();
             try {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/LineChart.fxml"));
@@ -743,26 +772,43 @@ public class MainWindowController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            printConsoleInfoMessage("Просмотр графика доступен только для аналоговых значений");
         }
     }
 
     public void addLineChartPoint(ProtocolDataModel protocolDataModel) {
-        if (protocolDataModel.getProtAddress().equals(analogAddressForChart)) {
-            Double newValue = Double.parseDouble(protocolDataModel.getProtValue());
-            Double aperture = newValue - oldValue;
-            oldValue = newValue;
-            Platform.runLater(()->{
-                lineChartController.setAperture(aperture);
-                lineChartController.setLastValue(protocolDataModel.getProtValue());
-            });
-        }
+        lineChartController.addLineChartPoint(protocolDataModel, analogAddressForChart);
     }
 
     private void switchTheme(String styleSheet) {
         mainPane.getScene().getStylesheets().clear();
         mainPane.getScene().setUserAgentStylesheet(null);
         mainPane.getScene().getStylesheets().add(getClass().getResource(styleSheet).toExternalForm());
+    }
+
+    //Скачивание образца банка данных
+    @FXML
+    private void downloadDataBaseTemplate() {
+        FileManager fileManager = new FileManager();
+        fileManager.downloadExcelFileTo("/dataBase/DB.xlsm");
+    }
+
+    @FXML
+    public void openAboutWindow() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/AboutWindow.fxml"));
+            AnchorPane aboutPane = loader.load();
+            Stage aboutStage = new Stage();
+            Scene scene = new Scene(aboutPane);
+            aboutStage.setScene(scene);
+            aboutStage.setResizable(false);
+            aboutStage.setTitle("О программе");
+            aboutStage.setMaximized(false);
+            aboutStage.setAlwaysOnTop(true);
+            aboutStage.getScene().getStylesheets().add(getClass().getResource("/view/DarkThemeRoot.css").toExternalForm());
+            aboutStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

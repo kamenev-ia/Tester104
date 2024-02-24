@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="63.0" layoutY="100.0" prefHeight="20.0" prefWidth="180.0" text="Версия" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="100.0" />
+      <Label layoutX="60.0" layoutY="147.0" prefHeight="20.0" prefWidth="180.0" text="Разработчик" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="130.0" />
+      <Label layoutX="60.0" layoutY="183.0" prefHeight="20.0" prefWidth="180.0" text="Контакты для связи" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="160.0" />
+      <Label layoutX="383.0" layoutY="102.0" prefHeight="20.0" prefWidth="180.0" text="4.3.2" AnchorPane.leftAnchor="260.0" AnchorPane.topAnchor="100.0" />
+      <Label layoutX="274.0" layoutY="132.0" prefHeight="20.0" prefWidth="180.0" text="Каменев Илья" AnchorPane.leftAnchor="260.0" AnchorPane.topAnchor="130.0" />
+      <Label layoutX="60.0" layoutY="47.0" text="TMTest">
+         <font>
+            <Font size="27.0" />
+         </font>
+      </Label>
+      <Label layoutX="260.0" layoutY="162.0" prefHeight="20.0" prefWidth="180.0" text="i_kamenev@inbox.ru" AnchorPane.leftAnchor="260.0" AnchorPane.topAnchor="160.0" />
+   </children>
+</AnchorPane>

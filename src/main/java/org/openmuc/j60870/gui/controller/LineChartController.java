@@ -10,6 +10,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.stage.WindowEvent;
+import org.openmuc.j60870.gui.model.ProtocolDataModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -125,5 +126,17 @@ public class LineChartController {
         series.getData().add(new XYChart.Data<>(simpleDateFormat.format(now), value));
         if (series.getData().size() > maxPoints)
             series.getData().remove(0, series.getData().size() - maxPoints - 1);
+    }
+
+    public void addLineChartPoint(ProtocolDataModel protocolDataModel, Integer analogAddressForChart) {
+        if (protocolDataModel.getProtAddress().equals(analogAddressForChart)) {
+            Double newValue = Double.parseDouble(protocolDataModel.getProtValue());
+            Double aperture = newValue - value;
+            value = newValue;
+            Platform.runLater(()->{
+                setAperture(aperture);
+                setLastValue(protocolDataModel.getProtValue());
+            });
+        }
     }
 }

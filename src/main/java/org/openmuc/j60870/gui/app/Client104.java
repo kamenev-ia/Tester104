@@ -71,9 +71,18 @@ public class Client104 {
                 mainWindowController.printConsoleErrorMessage("Получен сигнал закрытия соединения. Причина неизвестна.");
             }
             mainWindowController.printConsoleInfoMessage("Соединение остановлено");
+            mainWindowController.setIpFieldStyle(false);
         }
     }
 
+    /**
+     * Вызывается при получении нового ASDU. Заполняет модель {@link ProtocolDataModel} данными
+     * из нового ASDU.
+     *
+     * @param aSdu Новый полученный ASDU
+     * @param date Время получения нового ASDU
+     * @param io Объект информации полученный в составе нового ASDU
+     */
     public void initData(ASdu aSdu, String date, InformationObject io) {
         try {
             ProtocolDataModel protocolDataModel = new ProtocolDataModel();
@@ -88,15 +97,47 @@ public class Client104 {
         }
     }
 
-    public void clearDataTable() {
-        try {
-            protocolData.clear();
-            staticData.clear();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+    /**
+     * Вызывается при получении нового ASDU, если активна страница статичного отображения данных.
+     * Если в таблице статичного отображения данных уже содержится полученный объект информации,
+     * то обновляет его параметры. Если нет - добавляет новый объект в {@link ProtocolDataModel}
+     *
+     * @param aSdu Новый полученный ASDU
+     * @param date Время нового полученного ASDU
+     * @param io Объект информации полученный в составе нового ASDU
+     */
+    public void initStaticData(ASdu aSdu, String date, InformationObject io) {
+        int sizeStaticData = staticData.size();
+        boolean isContains = false;
+        ASduType aType = aSdu.getTypeIdentification();
+        if (aType == M_SP_TB_1 || aType == M_DP_TB_1 || aType == M_ME_TF_1 || aType == M_ME_NC_1 || aType == M_SP_NA_1 || aType == M_DP_NA_1
+        ) {
+            for (int i = 0; i < sizeStaticData; i++) {
+                ProtocolDataModel pdm = staticData.get(i);
+                if (pdm.getProtAddress() == io.getInformationObjectAddress() || staticData.isEmpty()) {
+                    fillProtocolDataModel(pdm, aSdu, date, io);
+                    isContains = true;
+                }
+                mainWindowController.initSingleStaticData(staticData);
+            }
+            if (!isContains) {
+                try {
+                    ProtocolDataModel protocolDataModel = new ProtocolDataModel();
+                    fillProtocolDataModel(protocolDataModel, aSdu, date, io);
+                    staticData.add(protocolDataModel);
+                    mainWindowController.initStaticData(staticData);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
+    /**
+     * Вызывается при получении нового ASDU.
+     *
+     * @param io Объект информации полученный в составе нового ASDU
+     */
     public void initDataBaseData(InformationObject io) {
         dataBaseTSData = mainWindowController.dataBaseList.get(0);
         int sizeDataBaseTSData = dataBaseTSData.size();
@@ -124,30 +165,12 @@ public class Client104 {
         }
     }
 
-    public void initStaticData(ASdu aSdu, String date, InformationObject io) {
-        int sizeStaticData = staticData.size();
-        boolean isContains = false;
-        ASduType aType = aSdu.getTypeIdentification();
-        if (aType == M_SP_TB_1 || aType == M_DP_TB_1 || aType == M_ME_TF_1 || aType == M_ME_NC_1 || aType == M_SP_NA_1 || aType == M_DP_NA_1
-        ) {
-            for (int i = 0; i < sizeStaticData; i++) {
-                ProtocolDataModel pdm = staticData.get(i);
-                if (pdm.getProtAddress() == io.getInformationObjectAddress() || staticData.isEmpty()) {
-                    fillProtocolDataModel(pdm, aSdu, date, io);
-                    isContains = true;
-                }
-                mainWindowController.initSingleStaticData(staticData);
-            }
-            if (!isContains) {
-                try {
-                    ProtocolDataModel protocolDataModel = new ProtocolDataModel();
-                    fillProtocolDataModel(protocolDataModel, aSdu, date, io);
-                    staticData.add(protocolDataModel);
-                    mainWindowController.initStaticData(staticData);
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
+    public void clearDataTable() {
+        try {
+            protocolData.clear();
+            staticData.clear();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -180,24 +203,28 @@ public class Client104 {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> connection.close()));
+        if (connection == null) {
+            mainWindowController.printConsoleErrorMessage("Указанный сервер недоступен. Проверьте подключение");
+        } else {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> connection.close()));
 
-        boolean connected = false;
-        int retries = 1;
-        int i = 1;
+            boolean connected = false;
+            int retries = 1;
+            int i = 1;
 
-        while (!connected && i <= retries) {
-            try {
-                mainWindowController.printConsoleInfoMessage("Отправка START_DT. Попытка № " + i);
-                connection.startDataTransfer(new ClientEventListener());
-            } catch (InterruptedIOException e2) {
-                connection.close();
-                return;
-            } catch (IOException e) {
-                mainWindowController.printConsoleErrorMessage("Подключение было закрыто. Причина: " + e.getMessage());
-                return;
+            while (!connected && i <= retries) {
+                try {
+                    mainWindowController.printConsoleInfoMessage("Отправка START_DT. Попытка № " + i);
+                    connection.startDataTransfer(new ClientEventListener());
+                } catch (InterruptedIOException e2) {
+                    connection.close();
+                    return;
+                } catch (IOException e) {
+                    mainWindowController.printConsoleErrorMessage("Подключение было закрыто. Причина: " + e.getMessage());
+                    return;
+                }
+                connected = true;
             }
-            connected = true;
         }
     }
 

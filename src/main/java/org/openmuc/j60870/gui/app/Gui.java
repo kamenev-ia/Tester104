@@ -36,7 +36,6 @@ public class Gui extends Application {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Out of license");
             System.exit(0);
         }
     }
