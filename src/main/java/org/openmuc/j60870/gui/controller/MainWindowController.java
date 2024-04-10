@@ -12,6 +12,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -22,6 +23,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -43,6 +47,7 @@ import org.openmuc.j60870.gui.utilities.Validator;
 import org.openmuc.j60870.ie.IeTime56;
 import org.openmuc.j60870.internal.cli.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.time.LocalDate;
@@ -208,7 +213,25 @@ public class MainWindowController {
         //Смена темы оформления
         darkTheme.setOnAction(event -> switchTheme("/view/DarkThemeRoot.css"));
         lightTheme.setOnAction(event -> switchTheme("/view/LightThemeRoot.css"));
+
+        dataTabPane.setOnDragOver(event -> {
+            if (event.getGestureSource() != dataTabPane && event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            event.consume();
+        });
+        dataTabPane.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                openExcelFile(db.getFiles().get(0));
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
     }
+
 
     private TextFieldTableCell<ProtocolDataModel, String> setValueColumnStyle() {
         TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
@@ -440,6 +463,25 @@ public class MainWindowController {
     public void openExcelFile() {
         excelConverter = new ExcelConverter(this);
         dataBaseList = excelConverter.openFile();
+
+        if (dataBaseList != null) {
+            this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
+            tsRadioButton.setDisable(false);
+            tiRadioButton.setDisable(false);
+            tuRadioButton.setDisable(false);
+            getToDataBaseCheckBox.setDisable(false);
+            writeExcelButton.setDisable(false);
+            protocolButton.setDisable(false);
+            initDataBase(dataBaseList.get(0));
+            dataBaseTable.setItems(dataBaseList.get(0));
+        } else {
+            this.dataBaseName.setText("Невозможно открыть файл");
+        }
+    }
+
+    private void openExcelFile(File file) {
+        excelConverter = new ExcelConverter(this);
+        dataBaseList = excelConverter.openFile(file);
 
         if (dataBaseList != null) {
             this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
