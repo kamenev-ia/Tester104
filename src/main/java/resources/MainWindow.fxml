@@ -24,7 +24,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 
-<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
+<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
     <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <top>
             <VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="65.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
@@ -70,10 +70,10 @@
             </VBox>
         </top>
         <left>
-            <AnchorPane prefHeight="200.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-                <TabPane layoutX="35.0" layoutY="35.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <AnchorPane fx:id="parameterPane" prefHeight="200.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+                <TabPane fx:id="parameterTabPane" layoutX="35.0" layoutY="29.333333333333332" prefHeight="886.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0">
                     <Tab text="Настройки">
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="886.0" prefWidth="271.0">
                             <Label layoutX="20.0" layoutY="23.0" text="ASDU адрес" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="23.0" />
                             <TextField fx:id="asduField" layoutX="130.0" layoutY="20.0" prefHeight="25.0" prefWidth="150.0" text="1" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" />
                             <Label layoutX="20.0" layoutY="53.0" text="Длина ASDU" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="53.0" />
@@ -92,7 +92,7 @@
                             <Label layoutX="116.0" layoutY="182.0" text="w" AnchorPane.leftAnchor="126.0" AnchorPane.topAnchor="200.0" />
                             <TextField fx:id="wField" layoutX="135.0" layoutY="177.0" prefHeight="25.0" prefWidth="30.0" text="8" AnchorPane.leftAnchor="140.0" AnchorPane.topAnchor="197.0" />
                             <Separator layoutX="40.0" layoutY="218.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="243.0" />
-                            <Label layoutX="123.0" layoutY="135.0" prefHeight="15.0" prefWidth="65.0" text="Таймауты" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="135.0" />
+                            <Label layoutX="123.0" layoutY="135.0" prefHeight="15.0" prefWidth="65.0" text="Таймауты" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="135.0" />
                         </AnchorPane>
                     </Tab>
                     <Tab text="Команды">
@@ -120,7 +120,7 @@
                     </Tab>
                     <Tab text="Банк данных">
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                            <Button layoutX="14.0" layoutY="96.0" mnemonicParsing="false" onAction="#openExcelFile" prefHeight="25.0" prefWidth="115.0" text="Открыть БД" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="95.0" />
+                            <Button layoutX="14.0" layoutY="96.0" mnemonicParsing="false" onAction="#openExcelFile" prefHeight="25.0" prefWidth="130.0" text="Открыть БД" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="95.0" />
                             <CheckBox fx:id="getToDataBaseCheckBox" disable="true" layoutX="16.0" layoutY="152.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="131.0" text="Включить прием" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="140.0" />
                             <Label fx:id="dataBaseName" layoutX="15.0" layoutY="181.0" prefHeight="17.0" prefWidth="270.0" text="Банк данных не загружен" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="175.0" />
                             <Separator layoutX="15.0" layoutY="82.0" prefHeight="3.0" prefWidth="270.0" />
@@ -134,13 +134,14 @@
                             <RadioButton fx:id="tsRadioButton" layoutX="83.0" layoutY="227.0" mnemonicParsing="false" text="ТС" />
                             <RadioButton fx:id="tiRadioButton" layoutX="132.0" layoutY="227.0" mnemonicParsing="false" text="ТИ" />
                             <RadioButton fx:id="tuRadioButton" layoutX="182.0" layoutY="227.0" mnemonicParsing="false" text="ТУ" />
-                            <Button fx:id="writeExcelButton" disable="true" layoutX="144.0" layoutY="96.0" mnemonicParsing="false" onAction="#writeExcel" prefHeight="25.0" prefWidth="137.0" text="Принять выделенные" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="95.0" />
+                            <Button fx:id="writeExcelButton" disable="true" layoutX="144.0" layoutY="96.0" mnemonicParsing="false" onAction="#writeExcel" prefHeight="25.0" prefWidth="130.0" text="Принять" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="95.0" />
                             <Separator layoutX="13.0" layoutY="259.0" prefHeight="5.0" prefWidth="274.0" />
-                            <Button fx:id="protocolButton" disable="true" layoutX="20.0" layoutY="280.0" mnemonicParsing="false" onAction="#openProtocolWindow" text="Заполнить протокол" />
-                            <Button layoutX="20.0" layoutY="318.0" mnemonicParsing="false" onAction="#downloadDataBaseTemplate" prefHeight="25.0" prefWidth="129.0" text="Скачать шаблон БД" />
+                            <Button fx:id="protocolButton" disable="true" layoutX="20.0" layoutY="280.0" mnemonicParsing="false" onAction="#openProtocolWindow" prefHeight="25.0" prefWidth="130.0" text="Заполнить протокол" AnchorPane.leftAnchor="15.0" />
+                            <Button layoutX="160.0" layoutY="280.0" mnemonicParsing="false" onAction="#downloadDataBaseTemplate" prefHeight="25.0" prefWidth="130.0" text="Скачать шаблон БД" AnchorPane.rightAnchor="15.0" />
                         </AnchorPane>
                     </Tab>
                 </TabPane>
+            <Button fx:id="resizeButton" layoutX="2.0" layoutY="1.0" mnemonicParsing="false" text="&lt;" />
             </AnchorPane>
         </left>
         <bottom>
@@ -163,14 +164,14 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <TableView fx:id="protocolTable" layoutX="70.0" layoutY="116.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="protTimeColumn" maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="94.0" text="Время" />
-                                    <TableColumn fx:id="protTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="95.0" text="Тип кадра" />
-                                    <TableColumn fx:id="protCauseColumn" maxWidth="1.7976931348623157E308" minWidth="160.0" prefWidth="123.0" text="Причина передачи" />
-                                    <TableColumn fx:id="protAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="53.0" text="ASDU" />
-                                    <TableColumn fx:id="protAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="65.0" text="Адрес" />
-                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="84.0" text="Значение" />
-                                    <TableColumn fx:id="protQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="112.0" text="Качество" />
-                                    <TableColumn fx:id="protTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="138.0" text="Метка времени" />
+                                    <TableColumn fx:id="protTimeColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Время" />
+                                    <TableColumn fx:id="protTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Тип кадра" />
+                                    <TableColumn fx:id="protCauseColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Причина передачи" />
+                                    <TableColumn fx:id="protAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="ASDU" />
+                                    <TableColumn fx:id="protAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="Адрес" />
+                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Значение" />
+                                    <TableColumn fx:id="protQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Качество" />
+                                    <TableColumn fx:id="protTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Метка времени" />
                                 </columns>
                         <opaqueInsets>
                            <Insets />

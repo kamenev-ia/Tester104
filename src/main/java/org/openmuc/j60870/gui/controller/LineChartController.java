@@ -1,6 +1,8 @@
 package org.openmuc.j60870.gui.controller;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
@@ -10,6 +12,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.stage.WindowEvent;
+import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
 
 import java.text.SimpleDateFormat;
@@ -28,7 +31,6 @@ public class LineChartController {
     private ScheduledExecutorService scheduledExecutorService;
     private SimpleDateFormat simpleDateFormat;
     private boolean isRealTimeChart;
-
     @FXML
     private LineChart<String, Double> lineChart;
     @FXML
@@ -93,6 +95,7 @@ public class LineChartController {
         yAxis.setLabel("Value");
         yAxis.setAnimated(true);
         lineChart.setAnimated(true);
+
         series = new XYChart.Series<>();
         lineChart.getData().add(series);
 
@@ -116,6 +119,7 @@ public class LineChartController {
 
     public void addLineChartPoint() {
         Date now = new Date();
+        lineChart.getData().add(series);
         series.getData().add(new XYChart.Data<>(simpleDateFormat.format(now), value));
         if (series.getData().size() > maxPoints)
             series.getData().remove(0, series.getData().size() - maxPoints - 1);

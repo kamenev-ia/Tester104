@@ -5,8 +5,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ public class ReadExcel {
 
     public static List<Map<String, java.io.Serializable>> readTable(String commentText, String currentDataBase) throws Exception {
         List<Map<String, java.io.Serializable>> list = new ArrayList<>();
-        InputStream ips = new FileInputStream(currentDataBase);
+        InputStream ips = Files.newInputStream(Paths.get(currentDataBase));
         XSSFWorkbook wb = new XSSFWorkbook(ips);
         XSSFSheet sheet1 = wb.getSheetAt(0);
         XSSFSheet sheetTS = wb.getSheetAt(1);

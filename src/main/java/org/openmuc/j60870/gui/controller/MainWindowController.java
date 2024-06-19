@@ -12,9 +12,9 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -23,7 +23,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -37,6 +36,7 @@ import javafx.util.Duration;
 import org.openmuc.j60870.*;
 import org.openmuc.j60870.gui.app.Client104;
 import org.openmuc.j60870.gui.app.ExcelConverter;
+import org.openmuc.j60870.gui.app.MultiChartTest;
 import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
 import org.openmuc.j60870.gui.model.SubstationParamModel;
@@ -55,7 +55,11 @@ import java.util.Calendar;
 
 public class MainWindowController {
     @FXML
-    AnchorPane mainPane;
+    AnchorPane mainPane, parameterPane;
+    @FXML
+    TabPane parameterTabPane;
+    @FXML
+    Button resizeButton;
     @FXML
     private TextField ipField, portField, asduField, t1Field, t2Field, t3Field, hourField, minuteField, secondField, tuAddressField, kField, wField, myIpField, filterField;
     @FXML
@@ -129,11 +133,17 @@ public class MainWindowController {
     private final ConsolePrinter consolePrinter = new ConsolePrinter();
     private final Validator validator = new Validator();
 
+    private String currentTheme;
+    private static final String DARK_THEME = "/view/DarkThemeRoot.css";
+    private static final String LIGHT_THEME = "/view/LightThemeRoot.css";
+
+
     public MainWindowController() {
     }
 
     @FXML
     private void initialize() {
+        currentTheme = DARK_THEME;
         isGetToChart = false;
         //Установка значений для полей длин адресов ASDU и объекта информации
         asduLengthBox.setItems(asduLengthList);
@@ -144,6 +154,8 @@ public class MainWindowController {
         protocolTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dataBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         staticTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        dataBaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         defaultStyleIpField = ipField.getStyle();
         ipField.focusedProperty().addListener((ov, oldV, newV) -> {
@@ -211,8 +223,8 @@ public class MainWindowController {
         aboutMenuItem.setOnAction(event -> openAboutWindow());
 
         //Смена темы оформления
-        darkTheme.setOnAction(event -> switchTheme("/view/DarkThemeRoot.css"));
-        lightTheme.setOnAction(event -> switchTheme("/view/LightThemeRoot.css"));
+        darkTheme.setOnAction(event -> switchTheme(DARK_THEME));
+        lightTheme.setOnAction(event -> switchTheme(LIGHT_THEME));
 
         dataTabPane.setOnDragOver(event -> {
             if (event.getGestureSource() != dataTabPane && event.getDragboard().hasFiles()) {
@@ -230,8 +242,21 @@ public class MainWindowController {
             event.setDropCompleted(success);
             event.consume();
         });
+
+        resizeButton.setOnAction(event -> resizePane());
     }
 
+    private void resizePane(){
+        if (parameterTabPane.getSide() == Side.TOP) {
+            parameterTabPane.setSide(Side.LEFT);
+            parameterPane.setMaxWidth(30);
+            resizeButton.setText(">");
+        } else {
+            resizeButton.setText("<");
+            parameterTabPane.setSide(Side.TOP);
+            parameterPane.setMaxWidth(300);
+        }
+    }
 
     private TextFieldTableCell<ProtocolDataModel, String> setValueColumnStyle() {
         TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
@@ -739,9 +764,27 @@ public class MainWindowController {
                 Platform.runLater(()->lineChartController.realTimeChart());
             }
         });
-        contextMenu.getItems().addAll(openLineChartMenuItem, openRealTimeLineChartMenuItem);
+        MenuItem openMultiChart = new MenuItem("MultiChart");
+        openMultiChart.setOnAction(event -> {
+            startMultiChart();
+            if (multiChartTest != null) {
+                Platform.runLater(() -> multiChartTest.realTimeChart());
+            }
+
+        });
+        contextMenu.getItems().addAll(openLineChartMenuItem, openRealTimeLineChartMenuItem, openMultiChart);
         return contextMenu;
     }
+
+    //Тестовый блок для MultiChart
+    public MultiChartTest multiChartTest;
+    public void startMultiChart() {
+        ObservableList<DataModel> dataModelList = dataBaseTable.getSelectionModel().getSelectedItems();
+        multiChartTest = new MultiChartTest();
+        Stage stage = new Stage();
+        multiChartTest.startChart(stage, dataModelList);
+    }
+    //Конец тестового блока для MultiChart
 
     private ContextMenu tuContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
@@ -775,45 +818,33 @@ public class MainWindowController {
         if (tableView.equals(protocolTable)) {
             if (protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("36 (Measured value, short floating point number with time tag CP56Time2a)") || protocolTable.getSelectionModel().getSelectedItem().getProtType().equals("13 (Measured value, short floating point number)")) {
                 analogAddressForChart = protocolTable.getSelectionModel().getSelectedItem().getProtAddress();
-                try {
-                    FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(getClass().getResource("/LineChart.fxml"));
-                    AnchorPane baseAppPane = loader.load();
-                    Stage lineChartStage = new Stage();
-                    Scene scene = new Scene(baseAppPane);
-                    lineChartStage.setScene(scene);
-                    lineChartStage.setResizable(true);
-                    lineChartController = loader.getController();
-                    lineChartController.setTitle(analogAddressForChart);
-                    lineChartController.setMvc(this);
-                    scene.getStylesheets().add(mainPane.getScene().getStylesheets().get(0));
-                    lineChartStage.show();
-                    lineChartStage.setOnCloseRequest(lineChartController.getCloseEventHandler());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                openLineChartWindow();
             } else {
                 printConsoleInfoMessage("Просмотр графика доступен только для аналоговых значений");
             }
         } else {
             analogAddressForChart = dataBaseTable.getSelectionModel().getSelectedItem().getIoa();
-            try {
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/LineChart.fxml"));
-                AnchorPane baseAppPane = loader.load();
-                Stage lineChartStage = new Stage();
-                Scene scene = new Scene(baseAppPane);
-                lineChartStage.setScene(scene);
-                lineChartStage.setResizable(true);
-                lineChartController = loader.getController();
-                lineChartController.setTitle(analogAddressForChart);
-                lineChartController.setMvc(this);
-                scene.getStylesheets().add(mainPane.getScene().getStylesheets().get(0));
-                lineChartStage.show();
-                lineChartStage.setOnCloseRequest(lineChartController.getCloseEventHandler());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            openLineChartWindow();
+        }
+    }
+
+    private void openLineChartWindow() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/LineChart.fxml"));
+            AnchorPane baseAppPane = loader.load();
+            Stage lineChartStage = new Stage();
+            Scene scene = new Scene(baseAppPane);
+            lineChartStage.setScene(scene);
+            lineChartStage.setResizable(true);
+            lineChartController = loader.getController();
+            lineChartController.setTitle(analogAddressForChart);
+            lineChartController.setMvc(this);
+            scene.getStylesheets().add(getClass().getResource(currentTheme).toExternalForm());
+            lineChartStage.show();
+            lineChartStage.setOnCloseRequest(lineChartController.getCloseEventHandler());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -822,9 +853,10 @@ public class MainWindowController {
     }
 
     private void switchTheme(String styleSheet) {
+        currentTheme = styleSheet;
         mainPane.getScene().getStylesheets().clear();
         mainPane.getScene().setUserAgentStylesheet(null);
-        mainPane.getScene().getStylesheets().add(getClass().getResource(styleSheet).toExternalForm());
+        mainPane.getScene().getStylesheets().add(getClass().getResource(currentTheme).toExternalForm());
     }
 
     //Скачивание образца банка данных
@@ -847,7 +879,7 @@ public class MainWindowController {
             aboutStage.setTitle("О программе");
             aboutStage.setMaximized(false);
             aboutStage.setAlwaysOnTop(true);
-            aboutStage.getScene().getStylesheets().add(getClass().getResource("/view/DarkThemeRoot.css").toExternalForm());
+            aboutStage.getScene().getStylesheets().add(getClass().getResource(currentTheme).toExternalForm());
             aboutStage.show();
         } catch (IOException e) {
             e.printStackTrace();

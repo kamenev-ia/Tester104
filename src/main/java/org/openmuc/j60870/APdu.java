@@ -116,6 +116,7 @@ class APdu {
         socket.setSoTimeout(0);
 
         ExtendedDataInputStream is = new ExtendedDataInputStream(socket.getInputStream());
+
         if (is.readByte() != START_FLAG) {
             throw new IOException("Message does not start with START flag (0x68). Broken connection.");
         }
