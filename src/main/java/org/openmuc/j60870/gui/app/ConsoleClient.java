@@ -183,12 +183,7 @@ public final class ConsoleClient {
             e.printStackTrace();
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                connection.close();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> connection.close()));
 
         boolean connected = false;
         int retries = startDtRetries.getValue();
@@ -232,6 +227,6 @@ public final class ConsoleClient {
         for (String string : strings) {
             sb.append(string);
         }
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 }

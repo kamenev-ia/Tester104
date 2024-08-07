@@ -19,7 +19,6 @@ public class DataModel {
         this.value = new SimpleStringProperty(value);
         this.quality = new SimpleStringProperty(quality);
         this.check = new CheckBox();
-
         this.check.addEventHandler(MouseEvent.MOUSE_ENTERED,
                 event -> {
                     if (event.isShiftDown()) {

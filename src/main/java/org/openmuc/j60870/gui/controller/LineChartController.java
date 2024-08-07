@@ -1,8 +1,6 @@
 package org.openmuc.j60870.gui.controller;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
@@ -12,7 +10,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.stage.WindowEvent;
-import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
 
 import java.text.SimpleDateFormat;

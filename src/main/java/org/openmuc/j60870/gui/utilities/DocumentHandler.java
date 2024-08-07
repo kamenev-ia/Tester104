@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.Version;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -33,7 +34,7 @@ public class DocumentHandler {
         File outFile = new File(savePath);
         Writer out = null;
         try {
-            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), UTF_8));
+            out = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outFile.toPath()), UTF_8));
         } catch (Exception e1) {
             e1.printStackTrace();
         }

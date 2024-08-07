@@ -71,6 +71,7 @@
         </top>
         <left>
             <AnchorPane fx:id="parameterPane" prefHeight="200.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+            <Button fx:id="resizeButton" mnemonicParsing="false" text="&lt;" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="1.0" />
                 <TabPane fx:id="parameterTabPane" layoutX="35.0" layoutY="29.333333333333332" prefHeight="886.0" prefWidth="300.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0">
                     <Tab text="Настройки">
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="886.0" prefWidth="271.0">
@@ -141,7 +142,6 @@
                         </AnchorPane>
                     </Tab>
                 </TabPane>
-            <Button fx:id="resizeButton" layoutX="2.0" layoutY="1.0" mnemonicParsing="false" text="&lt;" />
             </AnchorPane>
         </left>
         <bottom>
@@ -208,7 +208,6 @@
                                     <TableColumn fx:id="dataValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="119.33331298828125" text="Значение" />
                                     <TableColumn fx:id="dataQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="106.66668701171875" text="Качество" />
                                     <TableColumn fx:id="dataCheckColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="125.33331298828125" text="Отметка о приеме" />
-                                    <TableColumn prefWidth="75.0" />
                                 </columns>
                             </TableView>
                         </AnchorPane>

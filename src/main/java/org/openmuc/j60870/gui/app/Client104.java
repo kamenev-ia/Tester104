@@ -209,10 +209,11 @@ public class Client104 {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> connection.close()));
 
             boolean connected = false;
-            int retries = 1;
+//            int retries = 1;
             int i = 1;
 
-            while (!connected && i <= retries) {
+            //while (!connected && i <= retries) {
+            while (!connected) {
                 try {
                     mainWindowController.printConsoleInfoMessage("Отправка START_DT. Попытка № " + i);
                     connection.startDataTransfer(new ClientEventListener());

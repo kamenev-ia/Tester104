@@ -29,6 +29,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -40,10 +41,7 @@ import org.openmuc.j60870.gui.app.MultiChartTest;
 import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
 import org.openmuc.j60870.gui.model.SubstationParamModel;
-import org.openmuc.j60870.gui.utilities.ConsolePrinter;
-import org.openmuc.j60870.gui.utilities.FileManager;
-import org.openmuc.j60870.gui.utilities.UtilNet;
-import org.openmuc.j60870.gui.utilities.Validator;
+import org.openmuc.j60870.gui.utilities.*;
 import org.openmuc.j60870.ie.IeTime56;
 import org.openmuc.j60870.internal.cli.*;
 
@@ -111,11 +109,11 @@ public class MainWindowController {
     @FXML
     private ImageView imageView;
 
+
     public int indexListDataBase;
     public ExcelConverter excelConverter;
     public boolean isGetToChart;
-    public ObservableList<DataModel> dataBaseData = FXCollections.observableArrayList();
-    public ObservableList<ObservableList> dataBaseList = FXCollections.observableArrayList();
+    public ObservableList<ObservableList<DataModel>> dataBaseList = FXCollections.observableArrayList();
     public String defaultStyleIpField;
 
     public final ToggleGroup dataBaseListSelectGroup = new ToggleGroup();
@@ -132,6 +130,8 @@ public class MainWindowController {
     private final UtilNet utilNet = new UtilNet();
     private final ConsolePrinter consolePrinter = new ConsolePrinter();
     private final Validator validator = new Validator();
+    private final String errorBackgroundColor = "red";
+    private final String successBackgroundColor = "#336600";
 
     private String currentTheme;
     private static final String DARK_THEME = "/view/DarkThemeRoot.css";
@@ -145,7 +145,6 @@ public class MainWindowController {
     private void initialize() {
         currentTheme = DARK_THEME;
         isGetToChart = false;
-        //Установка значений для полей длин адресов ASDU и объекта информации
         asduLengthBox.setItems(asduLengthList);
         asduLengthBox.setValue("2 Byte");
         ioaLengthBox.setItems(ioaLengthList);
@@ -161,7 +160,7 @@ public class MainWindowController {
         ipField.focusedProperty().addListener((ov, oldV, newV) -> {
             if (!newV) {
                 if (!validator.validateIpAddress(ipField.getText())) {
-                    ipField.setStyle("-fx-background-color: red");
+                    ipField.setStyle("-fx-background-color: " + errorBackgroundColor);
                     printConsoleErrorMessage("Некорректное значение в поле IP адреса");
                 }
             } else {
@@ -172,7 +171,7 @@ public class MainWindowController {
         portField.focusedProperty().addListener((ov, oldV, newV) ->{
             if (!newV) {
                 if (!validator.validatePort(portField.getText())) {
-                    portField.setStyle("-fx-background-color: red");
+                    portField.setStyle("-fx-background-color: " + errorBackgroundColor);
                     printConsoleErrorMessage("Некорректное значение в поле порта");
                 }
             } else {
@@ -242,7 +241,6 @@ public class MainWindowController {
             event.setDropCompleted(success);
             event.consume();
         });
-
         resizeButton.setOnAction(event -> resizePane());
     }
 
@@ -263,20 +261,7 @@ public class MainWindowController {
         cell.itemProperty().addListener((obs, oldItem, newItem) -> {
             cell.setStyle("-fx-background-color: transparent");
             if (newItem != null) {
-                switch (newItem) {
-                    case "ON":
-                        cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
-                        break;
-                    case "OFF":
-                        cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
-                        break;
-                    case "INDETERMINATE_OR_INTERMEDIATE":
-                    case "INDETERMINATE":
-                        cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
-                        break;
-                    default:
-                        cell.setStyle("-fx-background-color: transparent");
-                }
+                setTSCellColor(newItem, cell);
             }
         });
         return cell;
@@ -301,25 +286,27 @@ public class MainWindowController {
                 timeline.setAutoReverse(true);
                 timeline.setCycleCount(5);
                 timeline.play();
-                timeline.setOnFinished(e -> {
-                    switch (newItem) {
-                        case "ON":
-                            cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
-                            break;
-                        case "OFF":
-                            cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
-                            break;
-                        case "INDETERMINATE_OR_INTERMEDIATE":
-                        case "INDETERMINATE":
-                            cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
-                            break;
-                        default:
-                            cell.setStyle("-fx-background-color: transparent");
-                    }
-                });
+                timeline.setOnFinished(e -> setTSCellColor(newItem, cell));
             }
         });
         return cell;
+    }
+
+    private void setTSCellColor(String newItem, TextFieldTableCell<ProtocolDataModel, String> cell) {
+        switch (newItem) {
+            case "ON":
+                cell.setStyle("-fx-background-color: rgba(200, 40, 0, 0.6) ;");
+                break;
+            case "OFF":
+                cell.setStyle("-fx-background-color: rgba(40, 200, 0, 0.6) ;");
+                break;
+            case "INDETERMINATE_OR_INTERMEDIATE":
+            case "INDETERMINATE":
+                cell.setStyle("-fx-background-color: rgba(200, 200, 0, 0.6) ;");
+                break;
+            default:
+                cell.setStyle("-fx-background-color: transparent");
+        }
     }
 
     private TextFieldTableCell<ProtocolDataModel, String> setQualityColumnStyle() {
@@ -488,26 +475,16 @@ public class MainWindowController {
     public void openExcelFile() {
         excelConverter = new ExcelConverter(this);
         dataBaseList = excelConverter.openFile();
-
-        if (dataBaseList != null) {
-            this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
-            tsRadioButton.setDisable(false);
-            tiRadioButton.setDisable(false);
-            tuRadioButton.setDisable(false);
-            getToDataBaseCheckBox.setDisable(false);
-            writeExcelButton.setDisable(false);
-            protocolButton.setDisable(false);
-            initDataBase(dataBaseList.get(0));
-            dataBaseTable.setItems(dataBaseList.get(0));
-        } else {
-            this.dataBaseName.setText("Невозможно открыть файл");
-        }
+        initializeExcelFile(dataBaseList);
     }
 
     private void openExcelFile(File file) {
         excelConverter = new ExcelConverter(this);
         dataBaseList = excelConverter.openFile(file);
+        initializeExcelFile(dataBaseList);
+    }
 
+    private void initializeExcelFile(ObservableList<ObservableList<DataModel>> dataBaseList) {
         if (dataBaseList != null) {
             this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
             tsRadioButton.setDisable(false);
@@ -597,7 +574,7 @@ public class MainWindowController {
 
     public void setIpFieldStyle(boolean connectionStatus) {
         if (connectionStatus) {
-            ipField.setStyle("-fx-background-color: #336600");
+            ipField.setStyle("-fx-background-color: " + successBackgroundColor);
         } else {
             ipField.setStyle("-fx-background-color: derive(#373e43, 35%)");
         }
@@ -627,7 +604,7 @@ public class MainWindowController {
             client104.createConnection(clientConnectionBuilder);
             if (client104.isConnectionOpen()) {
                 printConsoleSuccessMessage("Открыто соединение с " + ip + ":" + port);
-                ipField.setStyle("-fx-background-color: #336600");
+                ipField.setStyle("-fx-background-color: " + successBackgroundColor);
             } else {
                 printConsoleErrorMessage("Невозможно подключиться к " + ip + ":" + port);
             }
@@ -640,25 +617,34 @@ public class MainWindowController {
 
     //Вывод информационного сообщения в консоль
     public void printConsoleInfoMessage(String... strings) {
-        for (String string : strings) {
-            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
-            consolePrinter.printInfoMessage(list, string);
-        }
+        printMessage(Message.MessageType.INFO, strings);
     }
 
     //Вывод сообщения об ошибке в консоль
     public void printConsoleErrorMessage(String... strings) {
-        for (String string : strings) {
-            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
-            consolePrinter.printErrorMessage(list, string);
-        }
+        printMessage(Message.MessageType.ERROR, strings);
     }
 
     //Вывод сообщения об успешной операции в консоль
     public void printConsoleSuccessMessage(String... strings) {
+        printMessage(Message.MessageType.SUCCESS, strings);
+    }
+
+    public void printMessage(Message.MessageType type, String... strings) {
+        ObservableList<? extends Node> list;
         for (String string : strings) {
-            ObservableList<? extends Node> list = consoleTextFlow.getChildren();
-            consolePrinter.printSuccessMessage(list, string);
+            list = consoleTextFlow.getChildren();
+            switch (type) {
+                case ERROR:
+                    consolePrinter.printErrorMessage(list, string);
+                    break;
+                case INFO:
+                    consolePrinter.printInfoMessage(list, string);
+                    break;
+                case SUCCESS:
+                    consolePrinter.printSuccessMessage(list, string);
+                    break;
+            }
         }
     }
 
@@ -770,7 +756,6 @@ public class MainWindowController {
             if (multiChartTest != null) {
                 Platform.runLater(() -> multiChartTest.realTimeChart());
             }
-
         });
         contextMenu.getItems().addAll(openLineChartMenuItem, openRealTimeLineChartMenuItem, openMultiChart);
         return contextMenu;
@@ -778,7 +763,7 @@ public class MainWindowController {
 
     //Тестовый блок для MultiChart
     public MultiChartTest multiChartTest;
-    public void startMultiChart() {
+    private void startMultiChart() {
         ObservableList<DataModel> dataModelList = dataBaseTable.getSelectionModel().getSelectedItems();
         multiChartTest = new MultiChartTest();
         Stage stage = new Stage();
@@ -812,7 +797,7 @@ public class MainWindowController {
         return contextMenu;
     }
 
-    private Double oldValue = 0.0;
+    private final Double oldValue = 0.0;
 
     private void startLineChart(TableView tableView) {
         if (tableView.equals(protocolTable)) {
@@ -867,7 +852,7 @@ public class MainWindowController {
     }
 
     @FXML
-    public void openAboutWindow() {
+    private void openAboutWindow() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/AboutWindow.fxml"));
@@ -884,5 +869,11 @@ public class MainWindowController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+}
+
+class Message{
+    enum MessageType{
+        ERROR, INFO, SUCCESS;
     }
 }
