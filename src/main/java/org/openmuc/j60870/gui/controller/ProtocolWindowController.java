@@ -6,14 +6,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.openmuc.j60870.gui.app.SubstationDataBase;
 import org.openmuc.j60870.gui.utilities.DocumentHandler;
-import org.openmuc.j60870.gui.utilities.ReadExcel;
+
 import java.io.*;
 import java.util.List;
 import java.util.Map;
 
 public class ProtocolWindowController {
-    private String currentDataBase;
     private File file;
 
     @FXML
@@ -23,7 +23,7 @@ public class ProtocolWindowController {
     private TextArea commentArea;
 
     @FXML
-    private void createProtocolButton() throws Exception{
+    private void createProtocolButton() {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
@@ -34,7 +34,7 @@ public class ProtocolWindowController {
             String comment = commentArea.getText();
             DocumentHandler dh = new DocumentHandler();
             Template t = dh.getTemplate();
-            List<Map<String, Serializable>> list = ReadExcel.readTable(comment, currentDataBase);
+            List<Map<String, Serializable>> list = SubstationDataBase.readTable(comment);
             list.forEach(map -> {
                 Writer out = dh.getWriter(file.getPath());
                 dh.createDoc(t, map, out);
@@ -45,7 +45,6 @@ public class ProtocolWindowController {
     }
 
     void setCurrentDataBase(String currentDataBase) {
-        this.currentDataBase = currentDataBase;
     }
 
 }

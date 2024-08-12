@@ -29,14 +29,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import org.openmuc.j60870.*;
 import org.openmuc.j60870.gui.app.Client104;
-import org.openmuc.j60870.gui.app.ExcelConverter;
+import org.openmuc.j60870.gui.app.SubstationDataBase;
 import org.openmuc.j60870.gui.app.MultiChartTest;
 import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.ProtocolDataModel;
@@ -111,7 +110,7 @@ public class MainWindowController {
 
 
     public int indexListDataBase;
-    public ExcelConverter excelConverter;
+    public SubstationDataBase substationDataBase;
     public boolean isGetToChart;
     public ObservableList<ObservableList<DataModel>> dataBaseList = FXCollections.observableArrayList();
     public String defaultStyleIpField;
@@ -473,20 +472,20 @@ public class MainWindowController {
 
     @FXML
     public void openExcelFile() {
-        excelConverter = new ExcelConverter(this);
-        dataBaseList = excelConverter.openFile();
+        substationDataBase = new SubstationDataBase(this);
+        dataBaseList = substationDataBase.openFile();
         initializeExcelFile(dataBaseList);
     }
 
     private void openExcelFile(File file) {
-        excelConverter = new ExcelConverter(this);
-        dataBaseList = excelConverter.openFile(file);
+        substationDataBase = new SubstationDataBase(this);
+        dataBaseList = substationDataBase.openFile(file);
         initializeExcelFile(dataBaseList);
     }
 
     private void initializeExcelFile(ObservableList<ObservableList<DataModel>> dataBaseList) {
         if (dataBaseList != null) {
-            this.dataBaseName.setText("Открыт файл: " + excelConverter.getDataBaseName());
+            this.dataBaseName.setText("Открыт файл: " + substationDataBase.getDataBaseName());
             tsRadioButton.setDisable(false);
             tiRadioButton.setDisable(false);
             tuRadioButton.setDisable(false);
@@ -502,7 +501,7 @@ public class MainWindowController {
 
     @FXML
     public void writeExcel() {
-        excelConverter.fillOutputBDFile(dataBaseList);
+        substationDataBase.fillOutputBDFile(dataBaseList);
     }
 
     @FXML
@@ -722,7 +721,7 @@ public class MainWindowController {
             scene.getStylesheets().add(mainPane.getScene().getStylesheets().get(0));
             protocolStage.initModality(Modality.APPLICATION_MODAL);
             ProtocolWindowController controller = loader.getController();
-            controller.setCurrentDataBase(excelConverter.file.getAbsolutePath());
+            controller.setCurrentDataBase(substationDataBase.file.getAbsolutePath());
             protocolStage.setResizable(true);
             protocolStage.setTitle("Протокол");
             protocolStage.showAndWait();

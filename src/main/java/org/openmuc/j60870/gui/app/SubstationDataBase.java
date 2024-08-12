@@ -11,22 +11,40 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jetbrains.annotations.Nullable;
 import org.openmuc.j60870.gui.controller.MainWindowController;
 import org.openmuc.j60870.gui.model.DataModel;
 import org.openmuc.j60870.gui.model.SubstationParamModel;
 import org.openmuc.j60870.gui.model.TUDataModel;
+import org.openmuc.j60870.gui.substationBase.IOSheet;
+import org.openmuc.j60870.gui.substationBase.TIIOSheet;
+import org.openmuc.j60870.gui.substationBase.TSIOSheet;
+import org.openmuc.j60870.gui.substationBase.TUIOSheet;
+import org.openmuc.j60870.gui.utilities.CurrentDate;
 
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class ExcelConverter {
+public class SubstationDataBase {
     private static final String EQUIPMENT_SHEET_NAME = "Оборудование";
     private static final String TS_SHEET_NAME = "ТС";
+    private static final int TS_NAME_COLUMN_INDEX = 9;
+    private static final int TS_IOA_COLUMN_INDEX = 10;
+    private static final int TS_TYPE_COLUMN_INDEX = 11;
+    private static final int TS_CHECK_COLUMN_INDEX = 13;
     private static final String TI_SHEET_NAME = "ТИ";
+    private static final int TI_NAME_COLUMN_INDEX = 7;
+    private static final int TI_IOA_COLUMN_INDEX = 8;
+    private static final int TI_TYPE_COLUMN_INDEX = 9;
+    private static final int TI_CHECK_COLUMN_INDEX = 13;
     private static final String TU_SHEET_NAME = "ТУ";
+    private static final int TU_NAME_COLUMN_INDEX = 6;
+    private static final int TU_IOA_COLUMN_INDEX = 7;
+    private static final int TU_CHECK_COLUMN_INDEX = 9;
     public static ObservableList<DataModel> dataBaseTSData = FXCollections.observableArrayList();
     public static ObservableList<DataModel> dataBaseTIData = FXCollections.observableArrayList();
     public static ObservableList<DataModel> dataBaseTUData = FXCollections.observableArrayList();
@@ -34,12 +52,16 @@ public class ExcelConverter {
     private String dataBaseName;
     public MainWindowController mainWindowController;
     public File file;
+    private DataModel dataModel;
     private XSSFWorkbook dbWorkBook;
-    private XSSFSheet equipmentSheet, tsSheet, tiSheet, tuSheet;
+    private static XSSFSheet equipmentSheet;
+    private static TSIOSheet tsSheet;
+    private static TIIOSheet tiSheet;
+    private static TUIOSheet tuSheet;
     private final List<String> sheetsNameList = new ArrayList<>();
     private final HashMap<String, XSSFSheet> sheetHashMap = new HashMap<>();
 
-    public ExcelConverter(MainWindowController mainWindowController) {
+    public SubstationDataBase(MainWindowController mainWindowController) {
         sheetsNameList.add(EQUIPMENT_SHEET_NAME);
         sheetsNameList.add(TS_SHEET_NAME);
         sheetsNameList.add(TI_SHEET_NAME);
@@ -55,6 +77,7 @@ public class ExcelConverter {
     }
 
     public ObservableList<ObservableList<DataModel>> openFile(File file) {
+        this.file = file;
         return openFileProcess(file);
     }
 
@@ -81,28 +104,26 @@ public class ExcelConverter {
             ObservableList<DataModel> dataModelTS = dataBaseModelObservableList.get(0);
             ObservableList<DataModel> dataModelTI = dataBaseModelObservableList.get(1);
             ObservableList<DataModel> dataModelTU = dataBaseModelObservableList.get(2);
-            FileInputStream excelFile = new FileInputStream(file);
-            XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-            XSSFSheet sheetTS = workbook.getSheet(TS_SHEET_NAME);
-            XSSFSheet sheetTI = workbook.getSheet(TI_SHEET_NAME);
-            XSSFSheet sheetTU = workbook.getSheet(TU_SHEET_NAME);
-            fillCheckedCell(dataModelTS, sheetTS);
-            fillCheckedCell(dataModelTI, sheetTI);
-            fillCheckedCell(dataModelTU, sheetTU);
+            fillCheckedCell(dataModelTS, tsSheet, TS_CHECK_COLUMN_INDEX);
+            fillCheckedCell(dataModelTI, tiSheet, TI_CHECK_COLUMN_INDEX);
+            fillCheckedCell(dataModelTU, tuSheet, TU_CHECK_COLUMN_INDEX);
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            workbook.write(fileOutputStream);
-            workbook.close();
+            dbWorkBook.write(fileOutputStream);
+            dbWorkBook.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void fillCheckedCell(ObservableList<DataModel> ol, XSSFSheet sheet) {
+    private void fillCheckedCell(ObservableList<DataModel> ol, IOSheet dbSheet, int checkColumnIndex) {
+        XSSFSheet sheet = dbSheet.getSheet();
         for (int i = 0; i < ol.size(); i++) {
             if (ol.get(i).getCheck().isSelected()) {
-                if (sheet.getRow(i + 1).getCell(9).getRichStringCellValue().getString().equals("")) {
-                    sheet.getRow(i + 1).getCell(9).setCellValue("Принято " + LocalDate.now());
+                if (sheet.getRow(i + 1).getCell(checkColumnIndex).getRichStringCellValue().getString().equals("")) {
+                    sheet.getRow(i + 1).getCell(checkColumnIndex).setCellValue("Принято " + LocalDate.now());
                 }
+            } else {
+                sheet.getRow(i + 1).getCell(checkColumnIndex).setCellValue("");
             }
         }
     }
@@ -110,106 +131,75 @@ public class ExcelConverter {
     private void fillDataBase() {
         CheckBox cb = new CheckBox();
         cb.setSelected(true);
-        DataModel dataModel = null;
         TUDataModel tuDataModel = null;
-        for (Row currentRow : tsSheet) {
-            for (Cell currentCell : currentRow) {
-                if (currentCell.getColumnIndex() == 9) {
-                    String strValue = currentCell.getRichStringCellValue().getString();
-                    dataModel = new DataModel();
-                    dataModel.setNameOfParam(strValue);
-                }
-                if (currentCell.getColumnIndex() == 13) {
-                    if (!currentCell.getRichStringCellValue().getString().equals("")) {
-                        if (dataModel != null) {
-                            dataModel.getCheck().setSelected(true);
-                        }
-                    }
-                }
-                if (currentCell.getColumnIndex() == 10) {
-                    switch (currentCell.getCellType()) {
-                        case NUMERIC:
-                            int ioaString = (int) currentCell.getNumericCellValue();
-                            if (dataModel != null) {
-                                dataModel.setIoa(ioaString);
-                            }
-                            dataBaseTSData.add(dataModel);
-                            break;
-                        case STRING:
-                            if (currentCell.getRowIndex() > 1) {
-                                printParsingBDError(TS_SHEET_NAME, "K" + (currentCell.getRowIndex() + 1));
-                            }
-                            break;
-                        default:
-                            printParsingBDError(TS_SHEET_NAME, "K" + (currentCell.getRowIndex() + 1));
-                    }
-                }
-            }
-        }
-
-        for (Row currentRow : tiSheet) {
-            for (Cell currentCell : currentRow) {
-                if (currentCell.getColumnIndex() == 7) {
-                    String strValue = currentCell.getRichStringCellValue().getString();
-                    dataModel = new DataModel();
-                    dataModel.setNameOfParam(strValue);
-                }
-                if (currentCell.getColumnIndex() == 13) {
-                    if (!currentCell.getRichStringCellValue().getString().equals("")) {
-                        if (dataModel != null) {
-                            dataModel.getCheck().setSelected(true);
-                        }
-                    }
-                }
-                if (currentCell.getColumnIndex() == 8) {
-                    switch (currentCell.getCellType()) {
-                        case NUMERIC:
-                            int ioaString = (int) currentCell.getNumericCellValue();
-                            if (dataModel != null) {
-                                dataModel.setIoa(ioaString);
-                            }
-                            dataBaseTIData.add(dataModel);
-                            break;
-                        case STRING:
-                            break;
-                        default:
-                            printParsingBDError(TI_SHEET_NAME, "I" + (currentCell.getRowIndex() + 1));
-                    }
-                }
-            }
-        }
+        fillModel(tsSheet, dataBaseTSData);
+        fillModel(tiSheet, dataBaseTIData);
 
         for (Row currentRow : tuSheet) {
             for (Cell currentCell : currentRow) {
-                if (currentCell.getColumnIndex() == 6) {
+                if (currentCell.getColumnIndex() == TU_NAME_COLUMN_INDEX) {
                     String strValue = currentCell.getRichStringCellValue().getString();
                     tuDataModel = new TUDataModel();
                     tuDataModel.setNameOfParam(strValue);
                 }
-                if (currentCell.getColumnIndex() == 9) {
+                if (currentCell.getColumnIndex() == TU_CHECK_COLUMN_INDEX) {
                     if (!currentCell.getRichStringCellValue().getString().equals("")) {
                         if (tuDataModel != null) {
                             tuDataModel.getCheck().setSelected(true);
                         }
                     }
                 }
-                if (currentCell.getColumnIndex() == 7) {
-                    switch (currentCell.getCellType()) {
-                        case NUMERIC:
-                            int ioaString = (int) currentCell.getNumericCellValue();
-                            if (tuDataModel != null) {
-                                tuDataModel.setIoa(ioaString);
-                            }
-                            dataBaseTUData.add(tuDataModel);
-                            break;
-                        case STRING:
-                            break;
-                        default:
-                            printParsingBDError(TU_SHEET_NAME, "H" + (currentCell.getRowIndex() + 1));
+                fillIOA(tuDataModel, TU_IOA_COLUMN_INDEX, dataBaseTUData, TU_SHEET_NAME, currentCell);
+            }
+        }
+    }
+
+    private void fillModel(IOSheet dbSheet, ObservableList<DataModel> dataBaseData) {
+        XSSFSheet sheet = dbSheet.getSheet();
+        for (Row currentRow : sheet) {
+            for (Cell currentCell : currentRow) {
+                dataModel = getDataModel(currentCell, dbSheet.getNameColumnIndex(), dbSheet.getCheckColumnIndex());
+                fillIOA(dataModel, dbSheet.getIOAColumnIndex(), dataBaseData, dbSheet.getDBSheetName(), currentCell);
+            }
+        }
+    }
+
+    private void fillIOA(DataModel dataModel, int ioaColumnIndex, ObservableList<DataModel> dataBaseData, String sheetName, Cell currentCell) {
+        if (currentCell.getColumnIndex() == ioaColumnIndex) {
+            switch (currentCell.getCellType()) {
+                case NUMERIC:
+                    int ioaString = (int) currentCell.getNumericCellValue();
+                    if (dataModel != null) {
+                        dataModel.setIoa(ioaString);
                     }
+                    dataBaseData.add(dataModel);
+                    break;
+                case STRING:
+                    if (currentCell.getRowIndex() > 1) {
+                        printParsingBDError(sheetName, currentCell.getAddress().formatAsString());
+                    }
+                    break;
+                default:
+                    printParsingBDError(sheetName, currentCell.getAddress().formatAsString());
+            }
+        }
+    }
+
+    @Nullable
+    private DataModel getDataModel(Cell currentCell, int nameColumnIndex, int checkColumnIndex) {
+        if (currentCell.getColumnIndex() == nameColumnIndex) {
+            String strValue = currentCell.getRichStringCellValue().getString();
+            dataModel = new DataModel();
+            dataModel.setNameOfParam(strValue);
+        }
+        if (currentCell.getColumnIndex() == checkColumnIndex) {
+            if (!currentCell.getRichStringCellValue().getString().equals("")) {
+                if (dataModel != null) {
+                    dataModel.getCheck().setSelected(true);
                 }
             }
         }
+        return dataModel;
     }
 
     private void printParsingBDError(String sheetName, String cellIndex) {
@@ -268,9 +258,9 @@ public class ExcelConverter {
             }
         }
         equipmentSheet = sheetHashMap.get(EQUIPMENT_SHEET_NAME);
-        tsSheet = sheetHashMap.get(TS_SHEET_NAME);
-        tiSheet = sheetHashMap.get(TI_SHEET_NAME);
-        tuSheet = sheetHashMap.get(TU_SHEET_NAME);
+        tsSheet = new TSIOSheet(sheetHashMap.get(TS_SHEET_NAME));
+        tiSheet = new TIIOSheet(sheetHashMap.get(TI_SHEET_NAME));
+        tuSheet = new TUIOSheet(sheetHashMap.get(TU_SHEET_NAME));
         return isBDChecked;
     }
 
@@ -284,5 +274,48 @@ public class ExcelConverter {
 
     public String getDataBaseName() {
         return dataBaseName;
+    }
+
+
+    //Заполнение протокола, подсчет сигналов в БД
+    private final static CurrentDate currentDate = new CurrentDate();
+
+    public static List<Map<String, Serializable>> readTable(String commentText){
+        List<Map<String, java.io.Serializable>> list = new ArrayList<>();
+        Row row = equipmentSheet.getRow(2);
+        Row equipRow = equipmentSheet.getRow(5);
+        Row ipRow = equipmentSheet.getRow(8);
+
+        int spts = tsSheet.getSinglePointTSCount();
+        int dpts = tsSheet.getDoublePointTSCount();
+        int ti = tiSheet.getTiCount();
+
+        int tuka = tuSheet.getCircuitBreakerControlCount();
+        int tukvit = tuSheet.getConfirmationControlCount();
+        int tuavr = tuSheet.getAvrControlCount();
+
+        String object = row.getCell(1).getStringCellValue() + " " + (int)row.getCell(2).getNumericCellValue();
+        String address = row.getCell(3).getStringCellValue();
+        String equipment = equipRow.getCell(3).getStringCellValue();
+        String region = row.getCell(0).getStringCellValue();
+        String date = currentDate.getCurrentDate("dd.MM.yyyy");
+        String ip = ipRow.getCell(4).getStringCellValue();
+
+        Map<String, java.io.Serializable> dataMap = new HashMap<>();
+        dataMap.put("object", object);
+        dataMap.put("address", address);
+        dataMap.put("equipment", equipment);
+        dataMap.put("region", region);
+        dataMap.put("date", date);
+        dataMap.put("comment", commentText);
+        dataMap.put("ipAddress", ip);
+        dataMap.put("singlePoint", spts);
+        dataMap.put("doublePoint", dpts);
+        dataMap.put("ti", ti);
+        dataMap.put("tuka", tuka);
+        dataMap.put("tukvit", tukvit);
+        dataMap.put("tuavr", tuavr);
+        list.add(dataMap);
+        return list;
     }
 }
