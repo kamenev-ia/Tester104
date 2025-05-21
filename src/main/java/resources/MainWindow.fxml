@@ -24,7 +24,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 
-<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
+<AnchorPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
     <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <top>
             <VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="65.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
@@ -34,7 +34,10 @@
                             <MenuItem fx:id="openBDMenuItem" mnemonicParsing="false" text="Открыть БД" />
                         </Menu>
                         <Menu fx:id="toolsMenu" mnemonicParsing="false" text="Инструменты">
-                     </Menu>
+                     <items>
+                        <MenuItem fx:id="emulator104MenuItem" mnemonicParsing="false" text="Эмулятор 104" />
+                        <MenuItem fx:id="cmdMenuItem" mnemonicParsing="false" text="Командная строка" />
+                     </items></Menu>
                         <Menu fx:id="docsMenu" mnemonicParsing="false" text="Документы">
                         </Menu>
                   <Menu mnemonicParsing="false" text="Вид">
@@ -63,9 +66,10 @@
                     <Button minWidth="80.0" mnemonicParsing="false" onAction="#pingIpAddress" prefWidth="60.0" text="Пинг" />
                     <Button minWidth="150.0" mnemonicParsing="false" onAction="#clearDataTable" prefWidth="150.0" text="Очистить данные" />
                     <Label minWidth="45.0" prefHeight="17.0" prefWidth="44.0" text="Мой IP:" />
-                    <TextField fx:id="myIpField" minWidth="110.0" prefHeight="25.0" prefWidth="137.0" text="IP" />
+               <ComboBox fx:id="interfacesComboBox" prefHeight="25.0" prefWidth="165.0" promptText="Выберите интерфейс" />
                     <Button minWidth="110.0" mnemonicParsing="false" onAction="#changeLocalIp" prefHeight="25.0" prefWidth="71.0" text="Изменить" />
-                    <TextField fx:id="filterField" layoutY="1.0" prefHeight="25.0" prefWidth="198.0" promptText="Фильтр..." />
+                    <TextField fx:id="filterField" layoutY="1.0" prefHeight="25.0" prefWidth="120.0" promptText="Фильтр..." />
+               <CheckBox fx:id="filterTypeCheckBox" mnemonicParsing="false" text="Равно" />
                 </ToolBar>
             </VBox>
         </top>
@@ -78,7 +82,7 @@
                             <Label layoutX="20.0" layoutY="23.0" text="ASDU адрес" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="23.0" />
                             <TextField fx:id="asduField" layoutX="130.0" layoutY="20.0" prefHeight="25.0" prefWidth="150.0" text="1" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" />
                             <Label layoutX="20.0" layoutY="53.0" text="Длина ASDU" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="53.0" />
-                            <ComboBox fx:id="asduLengthBox" layoutX="130.0" layoutY="50.0" prefWidth="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="50.0" />
+                            <ComboBox fx:id="aSduLengthBox" layoutX="130.0" layoutY="50.0" prefWidth="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="50.0" />
                             <Label layoutX="20.0" layoutY="83.0" text="Длина IOA" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="83.0" />
                             <ComboBox fx:id="ioaLengthBox" layoutX="130.0" layoutY="80.0" prefWidth="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
                             <Label layoutX="22.0" layoutY="145.0" text="t1" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="165.0" />
@@ -145,7 +149,7 @@
             </AnchorPane>
         </left>
         <bottom>
-            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="100.0" prefWidth="1920.0" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="200.0" minHeight="-Infinity" prefHeight="100.0" prefWidth="1920.0" BorderPane.alignment="CENTER">
                 <ScrollPane fx:id="consolePane" fitToHeight="true" fitToWidth="true" layoutY="235.0" prefHeight="100.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -164,12 +168,12 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <TableView fx:id="protocolTable" layoutX="70.0" layoutY="116.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="protTimeColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Время" />
+                                    <TableColumn fx:id="protTimeColumn" maxWidth="140.0" minWidth="140.0" prefWidth="-1.0" text="Время" />
                                     <TableColumn fx:id="protTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Тип кадра" />
                                     <TableColumn fx:id="protCauseColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Причина передачи" />
                                     <TableColumn fx:id="protAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="ASDU" />
                                     <TableColumn fx:id="protAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="Адрес" />
-                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Значение" />
+                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="120.0" prefWidth="-1.0" text="Значение" />
                                     <TableColumn fx:id="protQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Качество" />
                                     <TableColumn fx:id="protTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Метка времени" />
                                 </columns>
@@ -183,15 +187,15 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <TableView fx:id="staticTable" layoutX="64.0" layoutY="69.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="staticAsduColumn" prefWidth="46.0" text="ASDU" />
-                                    <TableColumn fx:id="staticAddressColumn" prefWidth="61.0" text="Адрес" />
-                                    <TableColumn fx:id="staticNameColumn" prefWidth="96.0" text="Наименование" />
-                                    <TableColumn fx:id="staticTypeColumn" prefWidth="67.0" text="Тип кадра" />
-                                    <TableColumn fx:id="staticCauseColumn" prefWidth="121.0" text="Причина передачи" />
-                                    <TableColumn fx:id="staticValueColumn" prefWidth="68.0" text="Значение" />
-                                    <TableColumn fx:id="staticQualityColumn" prefWidth="64.0" text="Качество" />
-                                    <TableColumn fx:id="staticTimeColumn" prefWidth="101.0" text="Метка времени" />
-                                    <TableColumn fx:id="staticClientTimeColumn" prefWidth="154.0" text="Время клиента" />
+                                    <TableColumn fx:id="staticAsduColumn" maxWidth="50.0" minWidth="50.0" prefWidth="-1.0" text="ASDU" />
+                                    <TableColumn fx:id="staticAddressColumn" maxWidth="70.0" minWidth="70.0" prefWidth="-1.0" text="Адрес" />
+                                    <TableColumn fx:id="staticNameColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Наименование" />
+                                    <TableColumn fx:id="staticTypeColumn" maxWidth="200.0" minWidth="200.0" prefWidth="-1.0" text="Тип кадра" />
+                                    <TableColumn fx:id="staticCauseColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Причина передачи" />
+                                    <TableColumn fx:id="staticValueColumn" maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="Значение" />
+                                    <TableColumn fx:id="staticQualityColumn" maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="Качество" />
+                                    <TableColumn fx:id="staticTimeColumn" maxWidth="1.7976931348623157E308" minWidth="140.0" prefWidth="-1.0" text="Метка времени" />
+                                    <TableColumn fx:id="staticClientTimeColumn" maxWidth="1.7976931348623157E308" minWidth="140.0" prefWidth="-1.0" text="Время клиента" />
                                 </columns>
                         <opaqueInsets>
                            <Insets />
@@ -203,11 +207,11 @@
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <TableView fx:id="dataBaseTable" editable="true" layoutX="126.0" layoutY="68.0" onSwipeLeft="#swipeListLeft" onSwipeRight="#swipeListRight" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="dataNameParamColumn" maxWidth="1.7976931348623157E308" minWidth="220.0" prefWidth="-1.0" text="Наименование параметра" />
-                                    <TableColumn fx:id="dataIoaColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="65.33331298828125" text="Адрес" />
-                                    <TableColumn fx:id="dataValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="119.33331298828125" text="Значение" />
-                                    <TableColumn fx:id="dataQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="106.66668701171875" text="Качество" />
-                                    <TableColumn fx:id="dataCheckColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="125.33331298828125" text="Отметка о приеме" />
+                                    <TableColumn fx:id="dataNameParamColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Наименование параметра" />
+                                    <TableColumn fx:id="dataIoaColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="Адрес" />
+                                    <TableColumn fx:id="dataValueColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Значение" />
+                                    <TableColumn fx:id="dataQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Качество" />
+                                    <TableColumn fx:id="dataCheckColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="-1.0" text="Отметка о приеме" />
                                 </columns>
                             </TableView>
                         </AnchorPane>

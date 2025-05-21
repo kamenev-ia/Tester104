@@ -105,6 +105,11 @@ configure(javaProjects) {
     implementation group: 'org.apache.poi', name :'poi', version : '5.2.2'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.29'
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.9'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.27'
+    implementation 'net.sourceforge.tess4j:tess4j:4.5.5'
+    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'net.java.dev.jna:jna:5.10.0'
+    implementation 'net.java.dev.jna:jna-platform:5.10.0'
   }
   
   jar {

@@ -1,7 +1,5 @@
 package org.openmuc.j60870.gui.substationBase;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class TUIOSheet extends XSSFSheet implements IOSheet {
@@ -22,26 +20,17 @@ public class TUIOSheet extends XSSFSheet implements IOSheet {
     }
 
     private int tuCounter(String controlType) {
-        int tuCount = 0;
-        for (Row currentRow : this.sheet) {
-            for (Cell currentCell : currentRow) {
-                if (currentCell.getColumnIndex() == CONTROL_TYPE_COLUMN_INDEX) {
-                    if (currentCell.getRowIndex() > 0) {
-                        if (currentCell.getStringCellValue().equals(controlType)) {
-                            tuCount = tuCount + 1;
-                        }
-                    }
-                }
-            }
-        }
-        return tuCount;
+        return counter(CONTROL_TYPE_COLUMN_INDEX, controlType);
     }
 
     public int getCircuitBreakerControlCount() {
         return tuCounter("ТУ В");
     }
     public int getConfirmationControlCount() {
-        return tuCounter("Квитирование РЗА");
+        return tuCounter("Квитирование");
+    }
+    public int getTestControlCount() {
+        return tuCounter("Тестирование");
     }
     public int getAvrControlCount() {
         return tuCounter("Вывод АВР");

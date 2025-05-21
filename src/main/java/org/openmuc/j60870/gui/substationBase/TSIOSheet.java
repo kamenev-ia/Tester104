@@ -1,7 +1,5 @@
 package org.openmuc.j60870.gui.substationBase;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class TSIOSheet extends XSSFSheet implements IOSheet {
@@ -26,19 +24,7 @@ public class TSIOSheet extends XSSFSheet implements IOSheet {
     }
 
     private int tsCounter(String asduType) {
-        int tsCount = 0;
-        for (Row currentRow : this.sheet) {
-            for (Cell currentCell : currentRow) {
-                if (currentCell.getColumnIndex() == ASDU_TYPE_COLUMN_INDEX) {
-                    if (currentCell.getRowIndex() > 0) {
-                        if (currentCell.getStringCellValue().equals(asduType)) {
-                            tsCount = tsCount + 1;
-                        }
-                    }
-                }
-            }
-        }
-        return tsCount;
+        return counter(ASDU_TYPE_COLUMN_INDEX, asduType);
     }
 
     public int getSinglePointTSCount() {

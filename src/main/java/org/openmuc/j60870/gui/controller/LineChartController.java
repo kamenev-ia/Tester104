@@ -1,6 +1,8 @@
 package org.openmuc.j60870.gui.controller;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
@@ -19,6 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class LineChartController {
+    private final BooleanProperty chartActive = new SimpleBooleanProperty(false);
     final CategoryAxis xAxis = new CategoryAxis();
     final NumberAxis yAxis = new NumberAxis();
     private int maxPoints = 20;
@@ -45,26 +48,37 @@ public class LineChartController {
 
     public void setMvc(MainWindowController mvc) {
         this.mvc = mvc;
+        chartActive.bindBidirectional(mvc.isGetToChartProperty());
     }
-    private final EventHandler<WindowEvent> closeEventHandler = new EventHandler<WindowEvent>() {
-        @Override
-        public void handle(WindowEvent event) {
-            if (isRealTimeChart) {
-                scheduledExecutorService.shutdownNow();
-            }
-        }
+    private final EventHandler<WindowEvent> closeEventHandler = event -> {
+        stopRealTimeChart();
     };
+
+    private void stopRealTimeChart(){
+        if (scheduledExecutorService != null && !scheduledExecutorService.isShutdown()) {
+            scheduledExecutorService.shutdownNow();
+            try {
+                if (!scheduledExecutorService.awaitTermination(2, TimeUnit.SECONDS)) {
+                    System.err.println("Не удалось корректно завершить выполнение задач");
+                }
+            } catch (InterruptedException e) {
+                System.err.println("Ожидание завершения задач прервано: " + e.getMessage());
+            }
+            scheduledExecutorService = null;
+        }
+    }
     public EventHandler<WindowEvent> getCloseEventHandler() {
         return closeEventHandler;
     }
 
     @FXML
     private void startButtonPressed() {
-        mvc.isGetToChart = true;
+        setChartActive(true);
     }
     @FXML
     private void stopButtonPressed() {
-        mvc.isGetToChart = false;
+        setChartActive(false);
+        stopRealTimeChart();
         setLastValue("0.0");
     }
 
@@ -110,29 +124,47 @@ public class LineChartController {
     }
 
     public void realTimeChart() {
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.scheduleAtFixedRate(() -> Platform.runLater(this::addLineChartPoint), 0, 1, TimeUnit.SECONDS);
+        if (scheduledExecutorService == null || scheduledExecutorService.isShutdown()) {
+            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        }
+        scheduledExecutorService.scheduleAtFixedRate(() ->
+                Platform.runLater(() -> {
+                    if (isChartActive()) {
+                        addLineChartPoint();
+                    }
+                }), 0, 1, TimeUnit.SECONDS);
     }
 
     public void addLineChartPoint() {
         Date now = new Date();
-        lineChart.getData().add(series);
         series.getData().add(new XYChart.Data<>(simpleDateFormat.format(now), value));
-        if (series.getData().size() > maxPoints)
-            series.getData().remove(0, series.getData().size() - maxPoints - 1);
+        int extraPoints = series.getData().size() - maxPoints;
+        if (extraPoints > 0)
+            series.getData().remove(0, extraPoints);
     }
 
     public void addLineChartPoint(Double value) {
         Date now = new Date();
         series.getData().add(new XYChart.Data<>(simpleDateFormat.format(now), value));
-        if (series.getData().size() > maxPoints)
-            series.getData().remove(0, series.getData().size() - maxPoints - 1);
+        int extraPoints = series.getData().size() - maxPoints;
+        if (extraPoints > 0)
+            series.getData().remove(0, extraPoints);
     }
 
     public void addLineChartPoint(ProtocolDataModel protocolDataModel, Integer analogAddressForChart) {
         if (protocolDataModel.getProtAddress().equals(analogAddressForChart)) {
-            Double newValue = Double.parseDouble(protocolDataModel.getProtValue());
-            Double aperture = newValue - value;
+            String protValueStr = protocolDataModel.getProtValue();
+            double newValue;
+            try {
+                if (protValueStr == null || protValueStr.trim().isEmpty()) {
+                    throw new NumberFormatException("Полученое значение пустое или равно null");
+                }
+                newValue = Double.parseDouble(protValueStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Ошибка преобразования полученного значения: " + protValueStr + ". " + e.getMessage());
+                return;
+            }
+            double aperture = newValue - value;
             value = newValue;
             Platform.runLater(()->{
                 setAperture(aperture);
@@ -140,4 +172,16 @@ public class LineChartController {
             });
         }
     }
+
+    public BooleanProperty chartActiveProperty() {
+        return chartActive;
+    }
+    public boolean isChartActive() {
+        return chartActive.get();
+    }
+
+    public void setChartActive(boolean value) {
+        chartActive.set(value);
+    }
+
 }

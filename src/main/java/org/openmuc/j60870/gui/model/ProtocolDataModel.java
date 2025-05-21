@@ -8,6 +8,7 @@ import javafx.beans.property.StringProperty;
 public class ProtocolDataModel {
     private final StringProperty protTime, protType, protCause, protValue, protQuality, protTimeTag;
     private final IntegerProperty protAsdu, protAddress;
+    private boolean newlyAdded = false;
     public ProtocolDataModel() {
         this(null, null, null, 0, 0, null, null, null);
     }
@@ -22,6 +23,14 @@ public class ProtocolDataModel {
         this.protValue = new SimpleStringProperty(protValue);
         this.protQuality = new SimpleStringProperty(protQuality);
         this.protTimeTag = new SimpleStringProperty(protTimeTag);
+    }
+
+    public boolean isNewlyAdded() {
+        return newlyAdded;
+    }
+
+    public void setNewlyAdded(boolean newlyAdded) {
+        this.newlyAdded = newlyAdded;
     }
 
     public StringProperty protTimeProperty() {

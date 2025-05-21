@@ -37,6 +37,16 @@
     -fx-background-color: derive(-fx-base,45%)
 }
 
+.table-row-cell {
+    -fx-border-color: black; /* Цвет границ строк */
+    -fx-border-width: 1px 0px 1px 0px; /* Верх и низ */
+}
+
+.table-column-header {
+    -fx-border-color: black; /* Границы заголовков */
+    -fx-border-width: 0 0 2px 0; /* Граница снизу для заголовка */
+}
+
 .button:default {
     -fx-base: -fx-accent ;
 }
@@ -47,11 +57,12 @@
 }
 
 .table-view .column-header .label{
-    -fx-alignment: CENTER_LEFT;
+    -fx-alignment: CENTER;
     -fx-font-weight: none;
 }
-
-
+.table-cell{
+    -fx-alignment: CENTER;
+}
 
 .list-cell:even,
 .list-cell:odd,

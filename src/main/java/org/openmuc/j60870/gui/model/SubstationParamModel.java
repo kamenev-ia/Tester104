@@ -1,20 +1,23 @@
 package org.openmuc.j60870.gui.model;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class SubstationParamModel {
-    private final StringProperty ipParam, substationNumberParam, substationAddressParam, portParam, substationTypeParam;
+    private final StringProperty ipParam, substationNumberParam, substationAddressParam, substationTypeParam;
+    private final IntegerProperty portParam;
 
     public SubstationParamModel() {
-        this("", "", "", "", "");
+        this("", "", "", 0, "");
     }
 
-    public SubstationParamModel(String ipParam, String substationNumberParam, String substationAddressParam, String portParam, String typeParam) {
+    public SubstationParamModel(String ipParam, String substationNumberParam, String substationAddressParam, int portParam, String typeParam) {
         this.ipParam = new SimpleStringProperty(ipParam);
         this.substationNumberParam = new SimpleStringProperty(substationNumberParam);
         this.substationAddressParam = new SimpleStringProperty(substationAddressParam);
-        this.portParam = new SimpleStringProperty(portParam);
+        this.portParam = new SimpleIntegerProperty(portParam);
         this.substationTypeParam = new SimpleStringProperty(typeParam);
     }
 
@@ -50,11 +53,11 @@ public class SubstationParamModel {
         this.substationAddressParam.set(substationAddressParam);
     }
 
-    public String getPortParam() {
+    public int getPortParam() {
         return portParam.get();
     }
 
-    public void setPortParam(String portParam) {
+    public void setPortParam(int portParam) {
         this.portParam.set(portParam);
     }
 }

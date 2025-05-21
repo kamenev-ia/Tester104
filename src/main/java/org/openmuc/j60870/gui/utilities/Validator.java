@@ -9,6 +9,6 @@ public class Validator {
     }
 
     public boolean validatePort(String port) {
-        return port.matches(PORT_PATTERN);
+        return (port.matches(PORT_PATTERN) & !(Integer.parseInt(port) < 1 || Integer.parseInt(port) > 65535));
     }
 }

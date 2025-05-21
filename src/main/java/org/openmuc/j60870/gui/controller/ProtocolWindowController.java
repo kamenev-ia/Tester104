@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class ProtocolWindowController {
     private File file;
-
     @FXML
     Button createProtocolButton;
 
@@ -23,8 +22,8 @@ public class ProtocolWindowController {
     private TextArea commentArea;
 
     @FXML
-    private void createProtocolButton() {
-        Stage stage = new Stage();
+    private void onCreateProtocolButtonPressed() {
+        Stage stage = (Stage) createProtocolButton.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Документ Word", "*.doc")
@@ -35,10 +34,13 @@ public class ProtocolWindowController {
             DocumentHandler dh = new DocumentHandler();
             Template t = dh.getTemplate();
             List<Map<String, Serializable>> list = SubstationDataBase.readTable(comment);
-            list.forEach(map -> {
-                Writer out = dh.getWriter(file.getPath());
-                dh.createDoc(t, map, out);
-            });
+            try (Writer out = dh.getWriter(file.getPath())) {
+                for (Map<String, Serializable> map : list) {
+                    dh.createDoc(t, map, out);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Stage protocolStage = (Stage) createProtocolButton.getScene().getWindow();
             protocolStage.close();
         }
@@ -48,3 +50,4 @@ public class ProtocolWindowController {
     }
 
 }
+
