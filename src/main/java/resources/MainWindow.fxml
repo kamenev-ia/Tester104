@@ -49,7 +49,14 @@
                              </items>
                          </Menu>
                      </items></Menu>
-                  <Menu mnemonicParsing="false" text="Справка">
+                  <Menu mnemonicParsing="false" text="Утилиты">
+                    <items>
+                      <MenuItem fx:id="openNetscan" mnemonicParsing="false" text="Netscan" />
+                        <MenuItem fx:id="openPutty" mnemonicParsing="false" text="PuTTY" />
+                    </items>
+                  </Menu>
+<!--                  <Menu fx:id="manualsMenu" mnemonicParsing="false" text="Справочники" />-->
+                  <Menu mnemonicParsing="false" text="?">
                     <items>
                       <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="О программе" />
                     </items>

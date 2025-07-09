@@ -41,6 +41,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Map;
+
+import static org.openmuc.j60870.gui.utilities.AppsLauncher.App.*;
 
 public class MainWindowController {
     // Constants
@@ -48,6 +51,8 @@ public class MainWindowController {
     private static final String LIGHT_THEME = "/view/LightThemeRoot.css";
     private static final String ERROR_BACKGROUND_COLOR = "red";
     private static final String SUCCESS_BACKGROUND_COLOR = "#336600";
+    private static final String MODBUS_RESOURCE_ROOT = "docs/modbus/";
+    private static final String DOCUMENTS_RESOURCE_ROOT = "docs/iec/";
 
     // UI Components
     @FXML private AnchorPane mainPane, parameterPane;
@@ -76,7 +81,8 @@ public class MainWindowController {
     @FXML private RadioButton tsRadioButton, tiRadioButton, tuRadioButton;
     @FXML private MenuBar menuBar;
     @FXML private Menu fileMenu, toolsMenu, docsMenu;
-    @FXML private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem, emulator104MenuItem, cmdMenuItem;
+    @FXML private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem, emulator104MenuItem, cmdMenuItem,
+            openNetscan, openPutty;
     @FXML private TextFlow consoleTextFlow;
     @FXML private ScrollPane consolePane;
 
@@ -88,6 +94,8 @@ public class MainWindowController {
     private final UtilNet utilNet = new UtilNet();
     private final ConsolePrinter consolePrinter = new ConsolePrinter();
     private final Validator validator = new Validator();
+    private final AppsLauncher appsLauncher = new AppsLauncher();
+    private final FileManager fileManager = new FileManager();
 
     // State
     private String currentTheme;
@@ -114,6 +122,7 @@ public class MainWindowController {
         setupComboBoxes();
         setupTooltips();
         setupContextMenus();
+        setupMenu();
     }
 
     private void setupInitialState() {
@@ -192,6 +201,19 @@ public class MainWindowController {
         });
     }
 
+    private void setupMenu() {
+        Map<String, Map<String, String>> modbusResourceStructure = fileManager.getResourceStructure(MODBUS_RESOURCE_ROOT);
+        Map<String, Map<String, String>> iecResourceStructure = fileManager.getResourceStructure(DOCUMENTS_RESOURCE_ROOT);
+        Menu manualsMenu = new Menu("Справочники");
+        Menu modbusMenu = new Menu("Карты Modbus");
+        Menu iecMenu = new Menu("ГОСТы");
+        manualsMenu.getItems().add(modbusMenu);
+        manualsMenu.getItems().add(iecMenu);
+        buildMenuFromStructure(iecMenu, iecResourceStructure);
+        buildMenuFromStructure(modbusMenu, modbusResourceStructure);
+        menuBar.getMenus().add(manualsMenu);
+    }
+
     private void setupMenuActions() {
         openBDMenuItem.setOnAction(event -> openExcelFile());
         aboutMenuItem.setOnAction(event -> openAboutWindow());
@@ -199,6 +221,8 @@ public class MainWindowController {
         cmdMenuItem.setOnAction(event -> openCmdWindow());
         darkTheme.setOnAction(event -> switchTheme(DARK_THEME));
         lightTheme.setOnAction(event -> switchTheme(LIGHT_THEME));
+        openNetscan.setOnAction(event -> openApps(NETSCAN));
+        openPutty.setOnAction(event -> openApps(PUTTY));
     }
 
     private void setupDragAndDrop() {
@@ -759,6 +783,10 @@ public class MainWindowController {
         }
     }
 
+    private void openApps(AppsLauncher.App app) {
+        appsLauncher.launchApp(app.getResourcePath());
+    }
+
     private Stage createStage(AnchorPane pane, String title, boolean resizable) {
         Stage stage = new Stage();
         Scene scene = new Scene(pane);
@@ -935,6 +963,28 @@ public class MainWindowController {
         if (toggle != null) {
             dataBaseListSelectGroup.selectToggle(toggle);
         }
+    }
+
+    private void buildMenuFromStructure(Menu parentMenu, Map<String, Map<String, String>> structure) {
+        structure.forEach((folder, files) -> {
+            if (folder.isEmpty()) {
+                // Файлы в корне
+                files.forEach((file, path) -> {
+                    MenuItem item = new MenuItem(file);
+                    item.setOnAction(e -> fileManager.handleResourceSelection(path));
+                    parentMenu.getItems().add(item);
+                });
+            } else {
+                // Подпапки
+                Menu subMenu = new Menu(folder);
+                files.forEach((file, path) -> {
+                    MenuItem item = new MenuItem(file);
+                    item.setOnAction(e -> fileManager.handleResourceSelection(path));
+                    subMenu.getItems().add(item);
+                });
+                parentMenu.getItems().add(subMenu);
+            }
+        });
     }
 
     /* Data Initialization Methods */
