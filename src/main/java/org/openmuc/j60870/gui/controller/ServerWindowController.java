@@ -33,7 +33,7 @@ public class ServerWindowController {
     private static final File SAVE_FILE = new File("senderData.json");
     private static final ServerModel DEFAULT_SERVER_MODEL = new ServerModel(30, 1, 1, 101, 0, 1);
 
-    //UI Components
+    //UI компоненты
     @FXML private TableView<ServerModel> serverTable;
     @FXML private TableColumn<ServerModel, Integer> aSduTypeColumn, causeOfTransmissionColumn, commonAddressColumn, ioaColumn, qualityColumn, valueColumn;
     @FXML private Button addRowButton, connectButton, disconnectButton, sendSelectedButton, sendAllButton, periodicSendButton, periodicSendStopButton;
@@ -62,7 +62,7 @@ public class ServerWindowController {
             })
             .create();
 
-    /* Initialization method */
+    /* Метод инициализации */
     @FXML
     private void initialize() {
         configureServerTable();

@@ -10,10 +10,10 @@ public class CmdWindowController {
     @FXML
     private TextArea console;
 
-    // позиция в тексте, с которой начинается пользовательский ввод
+    // Позиция в тексте, с которой начинается пользовательский ввод
     private int promptPosition;
 
-    // Логика работы с командами делегируется классу CommandExecutor
+    // Класс для выполнения работы с командами
     private CommandExecutor executor;
 
     @FXML
@@ -25,7 +25,7 @@ public class CmdWindowController {
                 "-fx-font-size: 14px;");
         appendPrompt();
 
-        // Не даём пользователю перемещаться в область, где уже есть вывод
+        // Не даёт пользователю перемещаться в область, где уже есть вывод
         console.caretPositionProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.intValue() < promptPosition) {
                 Platform.runLater(() -> console.positionCaret(console.getText().length()));
@@ -41,7 +41,7 @@ public class CmdWindowController {
                 event.consume();
                 return;
             }
-            // Обработка нажатия Enter – выполнение введенной команды
+            // Обработка нажатия Enter для выполнения введенной команды
             if (event.getCode() == KeyCode.ENTER) {
                 event.consume();
                 String currentText = console.getText();
@@ -49,7 +49,7 @@ public class CmdWindowController {
                     String command = currentText.substring(promptPosition).trim();
                     appendText("\n");
                     if (!command.isEmpty()) {
-                        // Если по ошибке команда начинается с ">", отсекаем его
+                        // Если по ошибке команда начинается с ">", символ отсекается
                         if (command.startsWith(">")) {
                             command = command.substring(2).trim();
                         }

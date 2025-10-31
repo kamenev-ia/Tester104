@@ -2,9 +2,7 @@ package org.openmuc.j60870.gui.app;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openmuc.j60870.gui.model.DataModel;
@@ -22,6 +20,8 @@ public class ExcelDataHandler {
     private final XSSFWorkbook workbook;
     private final Map<String, XSSFSheet> sheetsMap = new HashMap<>();
     private final CurrentDate currentDate = new CurrentDate();
+    private final DataFormatter dataFormatter = new DataFormatter();
+    private final FormulaEvaluator evaluator;
 
     /**
      * Загружает Excel-файл и проверяет наличие обязательных листов.
@@ -40,6 +40,7 @@ public class ExcelDataHandler {
                 }
                 sheetsMap.put(sheetName, sheet);
             }
+            evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         }
     }
 
@@ -61,22 +62,11 @@ public class ExcelDataHandler {
             DataModel model = new DataModel();
             Cell nameCell = row.getCell(nameCol);
             if (nameCell != null) {
-                model.setNameOfParam(nameCell.getRichStringCellValue().getString());
+                model.setNameOfParam(dataFormatter.formatCellValue(nameCell, evaluator));
             }
             Cell ioaCell = row.getCell(ioaCol);
             if (ioaCell != null) {
-                switch (ioaCell.getCellType()) {
-                    case STRING:
-                        try {
-                            model.setIoa(Integer.parseInt(ioaCell.getStringCellValue()));
-                        } catch (NumberFormatException e) {
-                            System.out.println("Ошибка преобразования строки в число: " + ioaCell.getStringCellValue());
-                        }
-                        break;
-                    case NUMERIC:
-                        model.setIoa((int) ioaCell.getNumericCellValue());
-                        break;
-                }
+                model.setIoa(Integer.parseInt(dataFormatter.formatCellValue(ioaCell, evaluator)));
             }
             Cell checkCell = row.getCell(checkCol);
             if (checkCell != null) {
@@ -109,7 +99,6 @@ public class ExcelDataHandler {
                 checkCell.setCellValue("");
             }
         }
-
         try (FileOutputStream fos = new FileOutputStream(file)) {
             workbook.write(fos);
         }
@@ -131,18 +120,18 @@ public class ExcelDataHandler {
                 if (cell != null && cell.getCellType() == CellType.STRING) {
                     switch (cell.getStringCellValue()) {
                         case "IP адрес":
-                            substationParam.setIpParam(equipmentSheet.getRow(currentRow.getRowNum() + 1).getCell(cell.getColumnIndex()).getStringCellValue());
+                            substationParam.setIpParam(dataFormatter.formatCellValue(equipmentSheet.getRow(currentRow.getRowNum() + 1).getCell(cell.getColumnIndex())));
                             break;
                         case "Порт":
-                            substationParam.setPortParam((int)equipmentSheet.getRow(currentRow.getRowNum() + 1).getCell(cell.getColumnIndex()).getNumericCellValue());
+                            substationParam.setPortParam(Integer.parseInt(dataFormatter.formatCellValue(equipmentSheet.getRow(currentRow.getRowNum() + 1).getCell(cell.getColumnIndex()))));
                             break;
                     }
                 }
             }
         }
-        substationParam.setSubstationAddressParam(row.getCell(3).getStringCellValue());
-        substationParam.setSubstationTypeParam(row.getCell(1).getStringCellValue());
-        substationParam.setSubstationNumberParam(String.valueOf((int) row.getCell(2).getNumericCellValue()));
+        substationParam.setSubstationTypeParam(dataFormatter.formatCellValue(row.getCell(1)));
+        substationParam.setSubstationAddressParam(dataFormatter.formatCellValue(row.getCell(3)));
+        substationParam.setSubstationNumberParam(dataFormatter.formatCellValue(row.getCell(2)));
         return substationParam;
     }
 
@@ -169,12 +158,12 @@ public class ExcelDataHandler {
         }
         int avrControlCount = tuSheet.getAvrControlCount();
 
-        String object = row.getCell(1).getStringCellValue() + " " + (int)row.getCell(2).getNumericCellValue();
-        String address = row.getCell(3).getStringCellValue();
-        String equipment = equipRow.getCell(3).getStringCellValue();
-        String region = row.getCell(0).getStringCellValue();
+        String object = dataFormatter.formatCellValue(row.getCell(1)) + " " + dataFormatter.formatCellValue(row.getCell(2));
+        String address = dataFormatter.formatCellValue(row.getCell(3));
+        String equipment = dataFormatter.formatCellValue(equipRow.getCell(3));
+        String region = dataFormatter.formatCellValue(row.getCell(0));
         String date = currentDate.getCurrentDate("dd.MM.yyyy");
-        String ip = ipRow.getCell(4).getStringCellValue();
+        String ip = dataFormatter.formatCellValue(ipRow.getCell(4));
 
         Map<String, java.io.Serializable> dataMap = new HashMap<>();
         dataMap.put("object", object);

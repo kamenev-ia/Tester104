@@ -41,15 +41,20 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Map;
+
+import static org.openmuc.j60870.gui.utilities.AppsLauncher.App.*;
 
 public class MainWindowController {
-    // Constants
+    // Константы
     private static final String DARK_THEME = "/view/DarkThemeRoot.css";
     private static final String LIGHT_THEME = "/view/LightThemeRoot.css";
     private static final String ERROR_BACKGROUND_COLOR = "red";
     private static final String SUCCESS_BACKGROUND_COLOR = "#336600";
+    private static final String MODBUS_RESOURCE_ROOT = "docs/modbus/";
+    private static final String DOCUMENTS_RESOURCE_ROOT = "docs/iec/";
 
-    // UI Components
+    // UI компоненты
     @FXML private AnchorPane mainPane, parameterPane;
     @FXML private TabPane parameterTabPane, dataTabPane;
     @FXML private Tab dataTab;
@@ -76,11 +81,12 @@ public class MainWindowController {
     @FXML private RadioButton tsRadioButton, tiRadioButton, tuRadioButton;
     @FXML private MenuBar menuBar;
     @FXML private Menu fileMenu, toolsMenu, docsMenu;
-    @FXML private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem, emulator104MenuItem, cmdMenuItem;
+    @FXML private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem, emulator104MenuItem, cmdMenuItem,
+            openNetscan, openPutty;
     @FXML private TextFlow consoleTextFlow;
     @FXML private ScrollPane consolePane;
 
-    // Models and Services
+    // Модели и Сервисы
     private final DifferentDisplayComboBox differentDisplayComboBox = new DifferentDisplayComboBox();
     private final BooleanProperty isGetToChart = new SimpleBooleanProperty(false);
     private final ToggleGroup dataBaseListSelectGroup = new ToggleGroup();
@@ -88,8 +94,10 @@ public class MainWindowController {
     private final UtilNet utilNet = new UtilNet();
     private final ConsolePrinter consolePrinter = new ConsolePrinter();
     private final Validator validator = new Validator();
+    private final AppsLauncher appsLauncher = new AppsLauncher();
+    private final FileManager fileManager = new FileManager();
 
-    // State
+    // Переменные
     private String currentTheme;
     private String defaultStyleIpField;
     private ObservableList<ObservableList<DataModel>> dataBaseList = FXCollections.observableArrayList();
@@ -101,11 +109,11 @@ public class MainWindowController {
     private int indexListDataBase;
     private SubstationDataBase substationDataBase;
 
-    // Data Collections
+    // Коллекции данных
     private final ObservableList<String> aSduLengthList = FXCollections.observableArrayList("1 Byte", "2 Bytes");
     private final ObservableList<String> ioaLengthList = FXCollections.observableArrayList("1 Byte", "2 Bytes", "3 Bytes");
 
-    /* Initialization Methods */
+    /* Методы инициализации */
     @FXML
     private void initialize() {
         setupInitialState();
@@ -114,6 +122,7 @@ public class MainWindowController {
         setupComboBoxes();
         setupTooltips();
         setupContextMenus();
+        setupMenu();
     }
 
     private void setupInitialState() {
@@ -130,7 +139,7 @@ public class MainWindowController {
         secondField.setText(String.valueOf(Calendar.SECOND));
     }
 
-    /* Event Handlers Setup */
+    /* Настройка обработчиков событий */
     private void setupEventHandlers() {
         setupIpFieldValidation();
         setupPortFieldValidation();
@@ -192,6 +201,19 @@ public class MainWindowController {
         });
     }
 
+    private void setupMenu() {
+        Map<String, Map<String, String>> modbusResourceStructure = fileManager.getResourceStructure(MODBUS_RESOURCE_ROOT);
+        Map<String, Map<String, String>> iecResourceStructure = fileManager.getResourceStructure(DOCUMENTS_RESOURCE_ROOT);
+        Menu manualsMenu = new Menu("Справочники");
+        Menu modbusMenu = new Menu("Карты Modbus");
+        Menu iecMenu = new Menu("ГОСТы");
+        manualsMenu.getItems().add(modbusMenu);
+        manualsMenu.getItems().add(iecMenu);
+        buildMenuFromStructure(iecMenu, iecResourceStructure);
+        buildMenuFromStructure(modbusMenu, modbusResourceStructure);
+        menuBar.getMenus().add(manualsMenu);
+    }
+
     private void setupMenuActions() {
         openBDMenuItem.setOnAction(event -> openExcelFile());
         aboutMenuItem.setOnAction(event -> openAboutWindow());
@@ -199,6 +221,8 @@ public class MainWindowController {
         cmdMenuItem.setOnAction(event -> openCmdWindow());
         darkTheme.setOnAction(event -> switchTheme(DARK_THEME));
         lightTheme.setOnAction(event -> switchTheme(LIGHT_THEME));
+        openNetscan.setOnAction(event -> openApps(NETSCAN));
+        openPutty.setOnAction(event -> openApps(PUTTY));
     }
 
     private void setupDragAndDrop() {
@@ -227,7 +251,7 @@ public class MainWindowController {
         resizeButton.setOnAction(event -> resizePane());
     }
 
-    /* Table Configuration */
+    /* Конфигурация таблиц */
     private void setupTableColumns() {
         configureProtocolTableColumns();
         configureStaticTableColumns();
@@ -276,7 +300,7 @@ public class MainWindowController {
         dataCheckColumn.setCellValueFactory(new PropertyValueFactory<>("check"));
     }
 
-    /* UI Components Setup */
+    /* Настройка UI компонентов */
     private void setupComboBoxes() {
         aSduLengthBox.setItems(aSduLengthList);
         aSduLengthBox.setValue("2 Byte");
@@ -301,7 +325,7 @@ public class MainWindowController {
         protocolTable.setContextMenu(tiContextMenu(protocolTable));
     }
 
-    /* Database List Selection Handlers */
+    /* Обработчики выбора листов БД */
     private void handleTsRadioButtonSelection() {
         indexListDataBase = 0;
         initDataBase(dataBaseList.get(0));
@@ -320,7 +344,7 @@ public class MainWindowController {
         dataBaseTable.setContextMenu(tuContextMenu());
     }
 
-    /* Context Menu Creation */
+    /* Создание контекстных меню */
     private ContextMenu tiContextMenu(TableView tableView) {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem openLineChartMenuItem = new MenuItem("Открыть график");
@@ -373,7 +397,7 @@ public class MainWindowController {
         }
     }
 
-    /* Connection Management */
+    /* Управление соединением */
     @FXML
     private void startButtonClicked() {
         new Thread(this::startButtonClickedAction).start();
@@ -413,7 +437,7 @@ public class MainWindowController {
     }
 
     private static boolean isHostAvailable(String ip, int port) {
-        try (Socket s = new Socket(ip, port)) {
+        try (Socket ignored = new Socket(ip, port)) {
             return true;
         } catch (IOException e) {
             return false;
@@ -465,7 +489,7 @@ public class MainWindowController {
         client104.closeConnection();
     }
 
-    /* Command Methods */
+    /* Меотды для команд */
     @FXML
     public void giButtonClicked() {
         client104.sendGI(commonAddressParam);
@@ -536,7 +560,7 @@ public class MainWindowController {
         }
     }
 
-    /* Database Operations */
+    /* Действия с БД */
     @FXML
     public void openExcelFile() {
         substationDataBase = new SubstationDataBase(this);
@@ -575,7 +599,7 @@ public class MainWindowController {
         substationDataBase.saveDataToFile(dataBaseList);
     }
 
-    /* UI Utility Methods */
+    /* Вспомогательные методы графического интерфейса */
     private void resizePane() {
         if (parameterTabPane.getSide() == Side.TOP) {
             parameterTabPane.setSide(Side.LEFT);
@@ -593,13 +617,14 @@ public class MainWindowController {
     }
 
     public void setIpFieldStyle(boolean connectionStatus) {
+        System.out.println("connectionStatus is: " + connectionStatus);
         ipField.setStyle(connectionStatus ?
                 "-fx-background-color: " + SUCCESS_BACKGROUND_COLOR :
                 "-fx-background-color: derive(#373e43, 35%)"
         );
     }
 
-    /* Console Output Methods */
+    /* Методы вывода сообщений в консоль приложения */
     public void printConsoleInfoMessage(String... strings) {
         printMessage(Message.MessageType.INFO, strings);
     }
@@ -629,7 +654,7 @@ public class MainWindowController {
         }
     }
 
-    /* Table Cell Styles */
+    /* Стили ячеек таблицы */
     private TextFieldTableCell<ProtocolDataModel, String> setValueColumnStyle() {
         TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
         cell.itemProperty().addListener((obs, oldItem, newItem) -> {
@@ -723,7 +748,7 @@ public class MainWindowController {
         return cell;
     }
 
-    /* Window Management */
+    /* Управление окнами */
     private void openAboutWindow() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AboutWindow.fxml"));
@@ -759,6 +784,10 @@ public class MainWindowController {
         }
     }
 
+    private void openApps(AppsLauncher.App app) {
+        appsLauncher.launchApp(app.getResourcePath());
+    }
+
     private Stage createStage(AnchorPane pane, String title, boolean resizable) {
         Stage stage = new Stage();
         Scene scene = new Scene(pane);
@@ -782,7 +811,7 @@ public class MainWindowController {
         }
     }
 
-    /* Chart Methods */
+    /* Методы для графиков */
     private void startLineChart(TableView tableView) {
         if (tableView.equals(protocolTable)) {
             handleProtocolTableChart();
@@ -835,7 +864,7 @@ public class MainWindowController {
         }
     }
 
-    /* Theme Management */
+    /* Управление темами оформления приложения */
     private void switchTheme(String styleSheet) {
         currentTheme = styleSheet;
         mainPane.getScene().getStylesheets().clear();
@@ -843,7 +872,7 @@ public class MainWindowController {
         mainPane.getScene().getStylesheets().add(getClass().getResource(currentTheme).toExternalForm());
     }
 
-    /* Getters and Setters */
+    /* Геттеры, Сеттеры */
     public BooleanProperty isGetToChartProperty() {
         return isGetToChart;
     }
@@ -860,7 +889,7 @@ public class MainWindowController {
         return getToDataBaseCheckBox.isSelected();
     }
 
-    /* Utility Methods */
+    /* Вспомогательные методы */
     @FXML
     private void downloadDataBaseTemplate() {
         FileManager fileManager = new FileManager();
@@ -937,7 +966,29 @@ public class MainWindowController {
         }
     }
 
-    /* Data Initialization Methods */
+    private void buildMenuFromStructure(Menu parentMenu, Map<String, Map<String, String>> structure) {
+        structure.forEach((folder, files) -> {
+            if (folder.isEmpty()) {
+                // Файлы в корне
+                files.forEach((file, path) -> {
+                    MenuItem item = new MenuItem(file);
+                    item.setOnAction(e -> fileManager.handleResourceSelection(path));
+                    parentMenu.getItems().add(item);
+                });
+            } else {
+                // Подпапки
+                Menu subMenu = new Menu(folder);
+                files.forEach((file, path) -> {
+                    MenuItem item = new MenuItem(file);
+                    item.setOnAction(e -> fileManager.handleResourceSelection(path));
+                    subMenu.getItems().add(item);
+                });
+                parentMenu.getItems().add(subMenu);
+            }
+        });
+    }
+
+    /* Методы инициализации данных */
     public void initDataBase(ObservableList<DataModel> dataModelObservableList) {
         try {
             dataBaseTable.setItems(dataModelObservableList);

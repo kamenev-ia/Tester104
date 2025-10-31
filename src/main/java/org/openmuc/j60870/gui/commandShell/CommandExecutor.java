@@ -23,10 +23,10 @@ public class CommandExecutor {
     public void executeCommandAsync(String command, Consumer<String> outputConsumer, Runnable onFinish) {
         new Thread(() -> {
             try {
-                // Запускаем cmd.exe с параметром /c (выполнить команду и завершиться)
+                // Запуск cmd.exe с параметром /c
                 currentProcess = new ProcessBuilder("cmd.exe", "/c", command).start();
 
-                // Чтение стандартного вывода (кодировка CP866)
+                // Чтение стандартного вывода
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(currentProcess.getInputStream(), "CP866"))) {
                     String line;

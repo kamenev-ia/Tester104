@@ -8,6 +8,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 
+/* Чек-бокс для установки качества выбором битов качества */
 public class CheckBoxPopupTableCell <S> extends TableCell<S, Integer> {
     private final Popup popup;
     private final VBox popupContent;

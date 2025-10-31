@@ -3,7 +3,6 @@ package org.openmuc.j60870.gui.substationBase;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import passport.astu.sources.db.tables.BaysTable;
 
 public class EquipmentSheet extends XSSFSheet {
     private static final String SHEET_NAME = "Оборудование";

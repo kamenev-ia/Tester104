@@ -110,10 +110,10 @@ public class Client104 {
         if (EnumSet.of(M_SP_TB_1, M_DP_TB_1, M_ME_TF_1, M_ME_NC_1, M_SP_NA_1, M_DP_NA_1).contains(aSdu.getTypeIdentification())) {
             ProtocolDataModel pdm = findStaticDataByAddress(io.getInformationObjectAddress());
             if (pdm != null) {
-                // Найдена существующая запись – обновляем её
+                // Если найдена существующая запись – ее обновление
                 fillProtocolDataModel(pdm, aSdu, date, io);
             } else {
-                // Если не найдена – создаём новую запись и помечаем её как новую
+                // Если не найдена – создание новой записи и пометка её как новой
                 try {
                     ProtocolDataModel newModel = new ProtocolDataModel();
                     newModel.setNewlyAdded(true);
@@ -123,7 +123,7 @@ public class Client104 {
                     mainWindowController.printConsoleErrorMessage("Ошибка: " + e.getMessage());
                 }
             }
-            // После завершения обработки обновляем UI
+            // Обновление UI после завершения обработки
             Platform.runLater(() -> mainWindowController.initStaticData(staticData));
         }
     }
@@ -143,11 +143,11 @@ public class Client104 {
      */
     public void initDataBaseData(InformationObject io) {
 
-        // Обновление для TS-данных (предположим, индексы для TS: value = 0, quality = 0, targetIndex = 0)
+        // Обновление для TS-данных
         ObservableList<DataModel> tsList = mainWindowController.getDataBaseList().get(0);
         updateDatabaseModels(tsList, io, 0, 0, 0);
 
-        // Обновление для TI-данных (например, value = 0, quality = 1, targetIndex = 1)
+        // Обновление для TI-данных
         ObservableList<DataModel> tiList = mainWindowController.getDataBaseList().get(1);
         updateDatabaseModels(tiList, io, 1, 0, 1);
     }
@@ -157,7 +157,7 @@ public class Client104 {
         // targetIndex – индекс списка, по которому потом будет вызван UI-метод обновления
         for (DataModel model : dataList) {
             if (model.getIoa() == io.getInformationObjectAddress()) {
-                // Обновляем значение и качество в зависимости от индексов
+                // Обновление значения и качества в зависимости от индексов
                 model.setValue(io.getInformationElements()[0][valueIndex].getValue());
                 model.setQuality(io.getInformationElements()[0][qualityIndex].getQuality());
             }
@@ -203,52 +203,12 @@ public class Client104 {
         protocolDataModel.setProtAddress(io.getInformationObjectAddress());
     }
 
-//    public void createConnection(ClientConnectionBuilder clientConnectionBuilder) {
-//        final int MAX_ATTEMPTS = 5;
-//        final int RETRY_DELAY_MS = 2000;
-//        int attempt = 1;
-//
-//        closeConnection();
-//
-//        try {
-//            connection = clientConnectionBuilder.build();
-//        } catch (IOException e) {
-//            Platform.runLater(() -> mainWindowController.printConsoleErrorMessage(
-//                    "Ошибка создания соединения: " + e.getMessage()));
-//            return;
-//        }
-//
-//        if (connection == null) {
-//            Platform.runLater(() -> mainWindowController.printConsoleErrorMessage(
-//                    "Указанный сервер недоступен. Проверьте подключение"));
-//        } else {
-//            Runtime.getRuntime().addShutdownHook(new Thread(() -> connection.close()));
-//
-//            boolean connected = false;
-//            int i = 1;
-//            while (!connected && attempt < MAX_ATTEMPTS) {
-//                try {
-//                    Platform.runLater(() -> mainWindowController.printConsoleInfoMessage("Отправка START_DT. Попытка № " + i));
-//                    connection.startDataTransfer(new ClientEventListener());
-//                } catch (InterruptedIOException e2) {
-//                    connection.close();
-//                    return;
-//                } catch (IOException e) {
-//                    attempt++;
-//                    Platform.runLater(() -> mainWindowController.printConsoleErrorMessage("Подключение было закрыто. Причина: " + e.getMessage()));
-//                    return;
-//                }
-//                connected = true;
-//            }
-//        }
-//    }
-
     public void createConnection(ClientConnectionBuilder clientConnectionBuilder) {
         final int MAX_ATTEMPTS = 3; // Максимальное количество попыток
         final int RETRY_DELAY_MS = 2000; // Задержка между попытками в миллисекундах
         int attempt = 1;
 
-        // Закрываем предыдущее соединение, если оно существует
+        // Закрытие предыдущего соединения, если оно существует
         if (connection != null) {
             closeConnection();
         }
