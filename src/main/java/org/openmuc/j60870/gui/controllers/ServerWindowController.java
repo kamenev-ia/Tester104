@@ -1,4 +1,4 @@
-package org.openmuc.j60870.gui.controller;
+package org.openmuc.j60870.gui.controllers;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
@@ -21,7 +21,7 @@ import javafx.util.converter.IntegerStringConverter;
 
 import org.openmuc.j60870.gui.emulator104.ASduSender;
 import org.openmuc.j60870.gui.customUI.CheckBoxPopupTableCell;
-import org.openmuc.j60870.gui.model.ServerModel;
+import org.openmuc.j60870.gui.models.ServerModel;
 import org.openmuc.j60870.gui.utilities.Validator;
 
 import java.io.*;

@@ -7,7 +7,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.openmuc.j60870.gui.controller.ProtocolWindowController">
+            fx:controller="org.openmuc.j60870.gui.controllers.ProtocolWindowController">
    <TextArea fx:id="commentArea" layoutX="14.0" layoutY="14.0" prefHeight="324.0" prefWidth="570.0"
              AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0"
              AnchorPane.topAnchor="40.0"/>

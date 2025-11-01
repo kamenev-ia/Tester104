@@ -1,4 +1,4 @@
-package org.openmuc.j60870.gui.model;
+package org.openmuc.j60870.gui.models;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

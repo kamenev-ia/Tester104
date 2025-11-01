@@ -1,4 +1,4 @@
-package org.openmuc.j60870.gui.controller;
+package org.openmuc.j60870.gui.controllers;
 
 import freemarker.template.Template;
 import javafx.fxml.FXML;

@@ -24,7 +24,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 
-<AnchorPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controller.MainWindowController">
+<AnchorPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openmuc.j60870.gui.controllers.MainWindowController">
     <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <top>
             <VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="65.0" prefWidth="1050.0" BorderPane.alignment="CENTER">
@@ -51,7 +51,7 @@
                      </items></Menu>
                   <Menu mnemonicParsing="false" text="Утилиты">
                     <items>
-                      <MenuItem fx:id="openNetscan" mnemonicParsing="false" text="Netscan" />
+                      <MenuItem fx:id="openNetScan" mnemonicParsing="false" text="Netscan" />
                         <MenuItem fx:id="openPutty" mnemonicParsing="false" text="PuTTY" />
                     </items>
                   </Menu>
@@ -171,18 +171,18 @@
         <center>
             <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                 <TabPane fx:id="dataTabPane" layoutX="150.0" layoutY="198.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <Tab text="Протокол">
+                    <Tab text="Поток">
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                            <TableView fx:id="protocolTable" layoutX="70.0" layoutY="116.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <TableView fx:id="streamTable" layoutX="70.0" layoutY="116.0" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columns>
-                                    <TableColumn fx:id="protTimeColumn" maxWidth="140.0" minWidth="140.0" prefWidth="-1.0" text="Время" />
-                                    <TableColumn fx:id="protTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Тип кадра" />
-                                    <TableColumn fx:id="protCauseColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Причина передачи" />
-                                    <TableColumn fx:id="protAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="ASDU" />
-                                    <TableColumn fx:id="protAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="Адрес" />
-                                    <TableColumn fx:id="protValueColumn" maxWidth="1.7976931348623157E308" minWidth="120.0" prefWidth="-1.0" text="Значение" />
-                                    <TableColumn fx:id="protQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Качество" />
-                                    <TableColumn fx:id="protTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Метка времени" />
+                                    <TableColumn fx:id="streamTableTimeColumn" maxWidth="140.0" minWidth="140.0" prefWidth="-1.0" text="Время" />
+                                    <TableColumn fx:id="streamTableTypeColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Тип кадра" />
+                                    <TableColumn fx:id="streamTableCauseColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Причина передачи" />
+                                    <TableColumn fx:id="streamTableAsduColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="ASDU" />
+                                    <TableColumn fx:id="streamTableAddressColumn" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="-1.0" text="Адрес" />
+                                    <TableColumn fx:id="streamTableValueColumn" maxWidth="1.7976931348623157E308" minWidth="120.0" prefWidth="-1.0" text="Значение" />
+                                    <TableColumn fx:id="streamTableQualityColumn" maxWidth="1.7976931348623157E308" minWidth="90.0" prefWidth="-1.0" text="Качество" />
+                                    <TableColumn fx:id="streamTableTimeTagColumn" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="-1.0" text="Метка времени" />
                                 </columns>
                         <opaqueInsets>
                            <Insets />

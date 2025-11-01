@@ -4,9 +4,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.openmuc.j60870.gui.controller.MainWindowController;
-import org.openmuc.j60870.gui.model.DataModel;
-import org.openmuc.j60870.gui.model.SubstationParamModel;
+import org.openmuc.j60870.gui.controllers.MainWindowController;
+import org.openmuc.j60870.gui.models.DataBaseDataModel;
+import org.openmuc.j60870.gui.models.SubstationParamModel;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +25,14 @@ public class SubstationDataBase {
      *
      * @return Список списков данных (ТС, ТИ, ТУ)
      */
-    public ObservableList<ObservableList<DataModel>> openFile() {
+    public ObservableList<ObservableList<DataBaseDataModel>> openFile() {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         currentFile = fileChooser.showOpenDialog(stage);
         return currentFile != null ? processFile(currentFile) : null;
     }
 
-    public ObservableList<ObservableList<DataModel>> openFile(File file) {
+    public ObservableList<ObservableList<DataBaseDataModel>> openFile(File file) {
         return file != null ? processFile(file) : null;
     }
 
@@ -42,18 +42,18 @@ public class SubstationDataBase {
      * @param file Файл для обработки
      * @return Список списков данных
      */
-    private ObservableList<ObservableList<DataModel>> processFile(File file) {
+    private ObservableList<ObservableList<DataBaseDataModel>> processFile(File file) {
         try {
             ExcelDataHandler excelHandler = new ExcelDataHandler(file);
 
-            ObservableList<DataModel> tsData = excelHandler.readSheetData("ТС", 9, 10, 13);
-            ObservableList<DataModel> tiData = excelHandler.readSheetData("ТИ", 7, 8, 13);
-            ObservableList<DataModel> tuData = excelHandler.readSheetData("ТУ", 6, 7, 9);
+            ObservableList<DataBaseDataModel> tsData = excelHandler.readSheetData("ТС", 9, 10, 13);
+            ObservableList<DataBaseDataModel> tiData = excelHandler.readSheetData("ТИ", 7, 8, 13);
+            ObservableList<DataBaseDataModel> tuData = excelHandler.readSheetData("ТУ", 6, 7, 9);
 
             SubstationParamModel substationParams = excelHandler.readSubstationParams();
             mainWindowController.setSubstationParamFromBD(substationParams);
 
-            ObservableList<ObservableList<DataModel>> dataBaseList = FXCollections.observableArrayList();
+            ObservableList<ObservableList<DataBaseDataModel>> dataBaseList = FXCollections.observableArrayList();
             dataBaseList.addAll(tsData, tiData, tuData);
 
             this.dataBaseName = file.getName();
@@ -71,7 +71,7 @@ public class SubstationDataBase {
      *
      * @param dataLists Список данных для записи
      */
-    public void saveDataToFile(ObservableList<ObservableList<DataModel>> dataLists) {
+    public void saveDataToFile(ObservableList<ObservableList<DataBaseDataModel>> dataLists) {
         if (currentFile != null) {
             try {
                 ExcelDataHandler excelHandler = new ExcelDataHandler(currentFile);

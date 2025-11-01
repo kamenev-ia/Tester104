@@ -1,4 +1,4 @@
-package org.openmuc.j60870.gui.controller;
+package org.openmuc.j60870.gui.controllers;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -12,7 +12,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.stage.WindowEvent;
-import org.openmuc.j60870.gui.model.ProtocolDataModel;
+import org.openmuc.j60870.gui.models.StreamDataModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -151,9 +151,9 @@ public class LineChartController {
             series.getData().remove(0, extraPoints);
     }
 
-    public void addLineChartPoint(ProtocolDataModel protocolDataModel, Integer analogAddressForChart) {
-        if (protocolDataModel.getProtAddress().equals(analogAddressForChart)) {
-            String protValueStr = protocolDataModel.getProtValue();
+    public void addLineChartPoint(StreamDataModel streamDataModel, Integer analogAddressForChart) {
+        if (streamDataModel.getStreamAddressProperty().equals(analogAddressForChart)) {
+            String protValueStr = streamDataModel.getStreamValueProperty();
             double newValue;
             try {
                 if (protValueStr == null || protValueStr.trim().isEmpty()) {
@@ -168,7 +168,7 @@ public class LineChartController {
             value = newValue;
             Platform.runLater(()->{
                 setAperture(aperture);
-                setLastValue(protocolDataModel.getProtValue());
+                setLastValue(streamDataModel.getStreamValueProperty());
             });
         }
     }

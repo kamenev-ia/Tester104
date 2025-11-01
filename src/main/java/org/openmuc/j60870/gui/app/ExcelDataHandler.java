@@ -5,8 +5,8 @@ import javafx.collections.ObservableList;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openmuc.j60870.gui.model.DataModel;
-import org.openmuc.j60870.gui.model.SubstationParamModel;
+import org.openmuc.j60870.gui.models.DataBaseDataModel;
+import org.openmuc.j60870.gui.models.SubstationParamModel;
 import org.openmuc.j60870.gui.substationBase.TIIOSheet;
 import org.openmuc.j60870.gui.substationBase.TSIOSheet;
 import org.openmuc.j60870.gui.substationBase.TUIOSheet;
@@ -53,24 +53,28 @@ public class ExcelDataHandler {
      * @param checkCol       Индекс столбца с флажками
      * @return Список моделей данных
      */
-    public ObservableList<DataModel> readSheetData(String sheetName, int nameCol, int ioaCol, int checkCol) {
-        ObservableList<DataModel> dataList = FXCollections.observableArrayList();
+    public ObservableList<DataBaseDataModel> readSheetData(String sheetName, int nameCol, int ioaCol, int checkCol) {
+        ObservableList<DataBaseDataModel> dataList = FXCollections.observableArrayList();
         XSSFSheet sheet = sheetsMap.get(sheetName);
 
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue; // пропускаем заголовок
-            DataModel model = new DataModel();
+            DataBaseDataModel model = new DataBaseDataModel();
             Cell nameCell = row.getCell(nameCol);
             if (nameCell != null) {
-                model.setNameOfParam(dataFormatter.formatCellValue(nameCell, evaluator));
+                model.setDbNameOfParamProperty(dataFormatter.formatCellValue(nameCell, evaluator));
             }
             Cell ioaCell = row.getCell(ioaCol);
             if (ioaCell != null) {
-                model.setIoa(Integer.parseInt(dataFormatter.formatCellValue(ioaCell, evaluator)));
+                try {
+                    model.setDbIoaProperty(Integer.parseInt(dataFormatter.formatCellValue(ioaCell, evaluator)));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
             Cell checkCell = row.getCell(checkCol);
             if (checkCell != null) {
-                model.getCheck().setSelected(!checkCell.getStringCellValue().isEmpty());
+                model.getDbCheckBox().setSelected(!checkCell.getStringCellValue().isEmpty());
             }
             dataList.add(model);
         }
@@ -86,14 +90,14 @@ public class ExcelDataHandler {
      * @param checkColIndex Индекс столбца с флажками
      * @throws IOException если файл не удаётся записать
      */
-    public void writeDataToFile(File file, ObservableList<DataModel> dataList, String sheetName, int checkColIndex) throws IOException {
+    public void writeDataToFile(File file, ObservableList<DataBaseDataModel> dataList, String sheetName, int checkColIndex) throws IOException {
         XSSFSheet sheet = sheetsMap.get(sheetName);
 
         for (int i = 0; i < dataList.size(); i++) {
             Row row = sheet.getRow(i + 1); // пропускаем заголовок
             Cell checkCell = row.getCell(checkColIndex);
 
-            if (dataList.get(i).getCheck().isSelected()) {
+            if (dataList.get(i).getDbCheckBox().isSelected()) {
                 checkCell.setCellValue(LocalDate.now().toString());
             } else {
                 checkCell.setCellValue("");

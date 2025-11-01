@@ -7,9 +7,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.openmuc.j60870.*;
-import org.openmuc.j60870.gui.controller.MainWindowController;
-import org.openmuc.j60870.gui.model.DataModel;
-import org.openmuc.j60870.gui.model.ProtocolDataModel;
+import org.openmuc.j60870.gui.controllers.MainWindowController;
+import org.openmuc.j60870.gui.models.DataBaseDataModel;
+import org.openmuc.j60870.gui.models.StreamDataModel;
 import org.openmuc.j60870.ie.IeQualifierOfInterrogation;
 import org.openmuc.j60870.ie.IeSingleCommand;
 import org.openmuc.j60870.ie.IeTime56;
@@ -22,20 +22,40 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Client104 {
 
     private final BooleanProperty addToChart = new SimpleBooleanProperty(false);
     public Connection connection;
     public MainWindowController mainWindowController;
-    public ObservableList<ProtocolDataModel> protocolData = FXCollections.observableArrayList();
-    public ObservableList<ProtocolDataModel> staticData = FXCollections.observableArrayList();
+    public ObservableList<StreamDataModel> streamData = FXCollections.observableArrayList();
+    public ObservableList<StreamDataModel> staticData = FXCollections.observableArrayList();
 
+    //HashMap - копия staticData для ускорения поиска и определения уникальности новых ASDU
+    private final Map<Integer, StreamDataModel> staticDataMap = new HashMap<>();
+
+    /**
+     * Конструктор с контроллером главного окна
+     * @param mwc
+     *          Контроллер главного окна
+     */
     public Client104(MainWindowController mwc) {
          mainWindowController = mwc;
          addToChart.bindBidirectional(mainWindowController.isGetToChartProperty());
     }
 
+    /**
+     * Создание и конфигурирование билдера клиентского соединения
+     *
+     * @param ipAddress
+     *              IP-адрес сервера, с которым устанавливается соединение
+     * @param cliConParameter
+     *              Объект с параметрами для соединения по IEC-104
+     * @return
+     *              Настроенный экземпляр {@link ClientConnectionBuilder}
+     */
     public ClientConnectionBuilder createClientConnectionBuilder(InetAddress ipAddress, CliConParameter cliConParameter) {
         return new ClientConnectionBuilder(ipAddress)
                 .setCommonAddressFieldLength(cliConParameter.getAsduLength())
@@ -49,7 +69,34 @@ public class Client104 {
                 .setMaxUnconfirmedIPdusReceived(cliConParameter.getwParam());
     }
 
+    /**
+     * Обработчик событий клиентского соединения по протоколу IEC-104.
+     * Класс реализует интерфейс {@link ConnectionEventListener} и обеспечивает обработку входящих данных
+     * и событий соединения.
+     * Основные функции:
+     * <ul>
+     * <li>разбор входящих ASdu и извлечение информационных объектов</li>
+     * <li>обработка данных (база данных, UI)</li>
+     * <li>отслеживание разрыва соединения</li>
+     * </ul>
+     * @see ConnectionEventListener
+     * @see ASdu
+     * @see InformationObject
+     */
     public class ClientEventListener implements ConnectionEventListener {
+        /**
+         * Обработка входящих {@link ASdu} сообщений
+         * Вызывается при получении нового сообщения от сервера.
+         * Функции:
+         * <ul>
+         * <li>извлечение всех {@link InformationObject} из ASDU</li>
+         * <li>инициализация временной метки сообщения</li>
+         * <li>обработка данных</li>
+         * </ul>
+         *
+         * @param aSdu
+         *          входящее ASDU сообщение
+         */
         @Override
         public void newASdu(ASdu aSdu) {
             AsduDate asduDate = new AsduDate();
@@ -67,6 +114,14 @@ public class Client104 {
             }
         }
 
+        /**
+         * Обработка разрыва соединения с сервером.
+         * Вызывается при закрытии соединения по инициативе сервера или при ошибке связи.
+         * Выдает информационное сообщение в консоль приложения и обновляет UI.
+         *
+         * @param e
+         *      исключение, содержащее информацию о причине разрыва соединения
+         */
         @Override
         public void connectionClosed(IOException e) {
             Platform.runLater(() -> {
@@ -83,42 +138,59 @@ public class Client104 {
     }
 
     /**
-     * Вызывается при получении нового ASDU. Заполняет модель {@link ProtocolDataModel} данными
+     * Вызывается при получении нового ASDU. Заполняет модель {@link StreamDataModel} данными
      * из нового ASDU.
      *
-     * @param aSdu Новый полученный ASDU
-     * @param date Время получения нового ASDU
-     * @param io Объект информации полученный в составе нового ASDU
+     * @param aSdu
+     *          Новый полученный ASDU
+     * @param date
+     *          Время получения нового ASDU
+     * @param io
+     *          Объект информации полученный в составе нового ASDU
      */
     public void initData(ASdu aSdu, String date, InformationObject io) {
         try {
-            final ProtocolDataModel protocolDataModel = new ProtocolDataModel();
-            fillProtocolDataModel(protocolDataModel, aSdu, date, io);
+            final StreamDataModel streamDataModel = new StreamDataModel();
+            fillProtocolDataModel(streamDataModel, aSdu, date, io);
             Platform.runLater(() ->{
-                protocolData.add(protocolDataModel);
+                streamData.add(streamDataModel);
                 if (isAddToChart()) {
-                    mainWindowController.addLineChartPoint(protocolDataModel);
+                    mainWindowController.addLineChartPoint(streamDataModel);
                 }
-                mainWindowController.initialize(protocolData);
+                mainWindowController.initialize(streamData);
             });
         } catch (NullPointerException e) {
             mainWindowController.printConsoleErrorMessage("Ошибка: " + e.getMessage());
         }
     }
 
+    /**
+     * Инициализирует и обновляет уникальные данные в UI на основе полученного {@link InformationObject}.
+     * Обрабатывает входящие {@link ASdu} определенного типа (ТИ, ТС) обновляя существующие записи
+     * в коллекции уникальных данных, создавая новые записи для InformationObject с неизвестными адресами и
+     * обновляет UI после обработки данных
+     *
+     * @param aSdu
+     *          объект {@link ASdu}
+     * @param date
+     *          дата/время в формате пригодном для отображения
+     * @param io
+     *          информационный объект, содержащий адрес и другие данные для обработки
+     */
     public void initStaticData(ASdu aSdu, String date, InformationObject io) {
         if (EnumSet.of(M_SP_TB_1, M_DP_TB_1, M_ME_TF_1, M_ME_NC_1, M_SP_NA_1, M_DP_NA_1).contains(aSdu.getTypeIdentification())) {
-            ProtocolDataModel pdm = findStaticDataByAddress(io.getInformationObjectAddress());
+            StreamDataModel pdm = findStaticDataByAddress(io.getInformationObjectAddress());
             if (pdm != null) {
                 // Если найдена существующая запись – ее обновление
                 fillProtocolDataModel(pdm, aSdu, date, io);
             } else {
                 // Если не найдена – создание новой записи и пометка её как новой
                 try {
-                    ProtocolDataModel newModel = new ProtocolDataModel();
+                    StreamDataModel newModel = new StreamDataModel();
                     newModel.setNewlyAdded(true);
                     fillProtocolDataModel(newModel, aSdu, date, io);
                     staticData.add(newModel);
+                    staticDataMap.put(newModel.getStreamAddressProperty(), newModel);
                 } catch (NullPointerException e) {
                     mainWindowController.printConsoleErrorMessage("Ошибка: " + e.getMessage());
                 }
@@ -127,39 +199,54 @@ public class Client104 {
             Platform.runLater(() -> mainWindowController.initStaticData(staticData));
         }
     }
-    private ProtocolDataModel findStaticDataByAddress(int address) {
-        for (ProtocolDataModel pdm : staticData) {
-            if (pdm.getProtAddress() == address) {
-                return pdm;
-            }
-        }
-        return null;
+
+    private StreamDataModel findStaticDataByAddress(int address) {
+        return staticDataMap.get(address);
     }
 
     /**
-     * Вызывается при получении нового ASDU.
+     * Обновляет данные в листах ТС и ТИ банка данных, полученного из контроллера
      *
-     * @param io Объект информации полученный в составе нового ASDU
+     * @param io
+     *          Информационный объект, содержащий данные для обновления
+     * @see MainWindowController
+     * @see InformationObject
+     * @see DataBaseDataModel
      */
     public void initDataBaseData(InformationObject io) {
 
         // Обновление для TS-данных
-        ObservableList<DataModel> tsList = mainWindowController.getDataBaseList().get(0);
+        ObservableList<DataBaseDataModel> tsList = mainWindowController.getDataBaseList().get(0);
         updateDatabaseModels(tsList, io, 0, 0, 0);
 
         // Обновление для TI-данных
-        ObservableList<DataModel> tiList = mainWindowController.getDataBaseList().get(1);
+        ObservableList<DataBaseDataModel> tiList = mainWindowController.getDataBaseList().get(1);
         updateDatabaseModels(tiList, io, 1, 0, 1);
     }
 
-    private void updateDatabaseModels(ObservableList<DataModel> dataList, InformationObject io,
+    /**
+     * Обновляет {@link DataBaseDataModel} в полученном списке на основе полученного {@link InformationObject}
+     *
+     * @param dataList
+     *          {@link ObservableList< DataBaseDataModel >} моделей данных для обновления
+     * @param io
+     *          {@link InformationObject} с исходными данными
+     * @param qualityIndex
+     *          Индекс элемента информации "Качество"
+     * @param valueIndex
+     *          Индекс элемента информации "Значение"
+     * @param targetIndex
+     *          Индекс листа банка данных
+     *
+     */
+    private void updateDatabaseModels(ObservableList<DataBaseDataModel> dataList, InformationObject io,
                                       int qualityIndex, int valueIndex, int targetIndex) {
-        // targetIndex – индекс списка, по которому потом будет вызван UI-метод обновления
-        for (DataModel model : dataList) {
-            if (model.getIoa() == io.getInformationObjectAddress()) {
+        // targetIndex – индекс листа БД, по которому будет вызван UI-метод обновления
+        for (DataBaseDataModel model : dataList) {
+            if (model.getDbIoaProperty() == io.getInformationObjectAddress()) {
                 // Обновление значения и качества в зависимости от индексов
-                model.setValue(io.getInformationElements()[0][valueIndex].getValue());
-                model.setQuality(io.getInformationElements()[0][qualityIndex].getQuality());
+                model.setDbValueProperty(io.getInformationElements()[0][valueIndex].getValue());
+                model.setDbQualityProperty(io.getInformationElements()[0][qualityIndex].getQuality());
             }
         }
 
@@ -170,37 +257,36 @@ public class Client104 {
         });
     }
 
-
+    /**
+     * Очистка коллекций данных и вспомогательной коллекции staticDataMap
+     */
     public void clearDataTable() {
-        try {
-            protocolData.clear();
-            staticData.clear();
-        } catch (NullPointerException e) {
-            mainWindowController.printConsoleErrorMessage("Ошибка: " + e.getMessage());
-        }
+        if (streamData != null) streamData.clear();
+        if (staticData != null) staticData.clear();
+        staticDataMap.clear();
     }
 
-    private void fillProtocolDataModel(ProtocolDataModel protocolDataModel, ASdu aSdu, String date, InformationObject io) {
-        protocolDataModel.setProtTime(date);
-        protocolDataModel.setProtAsdu(aSdu.getCommonAddress());
-        protocolDataModel.setProtCause(aSdu.getCauseOfTransmission().toString());
-        protocolDataModel.setProtQuality(io.getInformationElements()[0][0].getQuality());
-        protocolDataModel.setProtType(aSdu.getTypeIdentification().getId() + " (" +
+    private void fillProtocolDataModel(StreamDataModel streamDataModel, ASdu aSdu, String date, InformationObject io) {
+        streamDataModel.setStreamTimeProperty(date);
+        streamDataModel.setStreamAsduProperty(aSdu.getCommonAddress());
+        streamDataModel.setStreamCauseProperty(aSdu.getCauseOfTransmission().toString());
+        streamDataModel.setStreamQualityProperty(io.getInformationElements()[0][0].getQuality());
+        streamDataModel.setStreamTypeProperty(aSdu.getTypeIdentification().getId() + " (" +
                 aSdu.getTypeIdentification().getDescription() + ")");
         if (aSdu.getTypeIdentification() == M_SP_TB_1 || aSdu.getTypeIdentification() == M_DP_TB_1
         ) {
-            protocolDataModel.setProtTimeTag(io.getInformationElements()[0][1].getValue());
+            streamDataModel.setStreamTimeTagProperty(io.getInformationElements()[0][1].getValue());
         } else {
-            protocolDataModel.setProtTimeTag("");
+            streamDataModel.setStreamTimeTagProperty("");
         }
         if (aSdu.getTypeIdentification() == M_ME_NC_1 || aSdu.getTypeIdentification() == M_ME_TF_1) {
-            protocolDataModel.setProtQuality(io.getInformationElements()[0][1].getQuality());
+            streamDataModel.setStreamQualityProperty(io.getInformationElements()[0][1].getQuality());
         }
         if (aSdu.getTypeIdentification() == M_ME_TF_1) {
-            protocolDataModel.setProtTimeTag(io.getInformationElements()[0][2].getValue());
+            streamDataModel.setStreamTimeTagProperty(io.getInformationElements()[0][2].getValue());
         }
-        protocolDataModel.setProtValue(io.getInformationElements()[0][0].getValue());
-        protocolDataModel.setProtAddress(io.getInformationObjectAddress());
+        streamDataModel.setStreamValueProperty(io.getInformationElements()[0][0].getValue());
+        streamDataModel.setStreamAddressProperty(io.getInformationObjectAddress());
     }
 
     public void createConnection(ClientConnectionBuilder clientConnectionBuilder) {

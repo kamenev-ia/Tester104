@@ -1,4 +1,4 @@
-package org.openmuc.j60870.gui.controller;
+package org.openmuc.j60870.gui.controllers;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -29,7 +29,7 @@ import org.openmuc.j60870.ClientConnectionBuilder;
 import org.openmuc.j60870.gui.app.Client104;
 import org.openmuc.j60870.gui.app.SubstationDataBase;
 import org.openmuc.j60870.gui.customUI.DifferentDisplayComboBox;
-import org.openmuc.j60870.gui.model.*;
+import org.openmuc.j60870.gui.models.*;
 import org.openmuc.j60870.gui.utilities.*;
 import org.openmuc.j60870.ie.IeTime56;
 import org.openmuc.j60870.internal.cli.CliConParameter;
@@ -68,21 +68,21 @@ public class MainWindowController {
     @FXML private ComboBox<DifferentDisplayComboBox.Item> interfacesComboBox;
     @FXML private CheckBox pcTimeBox, getToDataBaseCheckBox, filterTypeCheckBox;
     @FXML private DatePicker datePicker;
-    @FXML private TableView<DataModel> dataBaseTable;
-    @FXML private TableColumn<DataModel, String> dataNameParamColumn, dataValueColumn, dataQualityColumn, dataCheckColumn;
-    @FXML private TableColumn<DataModel, Integer> dataIoaColumn;
-    @FXML private TableView<ProtocolDataModel> protocolTable, staticTable;
-    @FXML private TableColumn<ProtocolDataModel, String> protTimeColumn, protTypeColumn, protCauseColumn;
-    @FXML private TableColumn<ProtocolDataModel, String> protValueColumn, protQualityColumn, protTimeTagColumn;
-    @FXML private TableColumn<ProtocolDataModel, Integer> protAsduColumn, protAddressColumn;
-    @FXML private TableColumn<ProtocolDataModel, Integer> staticAsduColumn, staticAddressColumn;
-    @FXML private TableColumn<ProtocolDataModel, String> staticNameColumn, staticTypeColumn, staticCauseColumn;
-    @FXML private TableColumn<ProtocolDataModel, String> staticValueColumn, staticQualityColumn, staticTimeColumn, staticClientTimeColumn;
+    @FXML private TableView<DataBaseDataModel> dataBaseTable;
+    @FXML private TableColumn<DataBaseDataModel, String> dataNameParamColumn, dataValueColumn, dataQualityColumn, dataCheckColumn;
+    @FXML private TableColumn<DataBaseDataModel, Integer> dataIoaColumn;
+    @FXML private TableView<StreamDataModel> streamTable, staticTable;
+    @FXML private TableColumn<StreamDataModel, String> streamTableTimeColumn, streamTableTypeColumn, streamTableCauseColumn;
+    @FXML private TableColumn<StreamDataModel, String> streamTableValueColumn, streamTableQualityColumn, streamTableTimeTagColumn;
+    @FXML private TableColumn<StreamDataModel, Integer> streamTableAsduColumn, streamTableAddressColumn;
+    @FXML private TableColumn<StreamDataModel, Integer> staticAsduColumn, staticAddressColumn;
+    @FXML private TableColumn<StreamDataModel, String> staticNameColumn, staticTypeColumn, staticCauseColumn;
+    @FXML private TableColumn<StreamDataModel, String> staticValueColumn, staticQualityColumn, staticTimeColumn, staticClientTimeColumn;
     @FXML private RadioButton tsRadioButton, tiRadioButton, tuRadioButton;
     @FXML private MenuBar menuBar;
     @FXML private Menu fileMenu, toolsMenu, docsMenu;
     @FXML private MenuItem openBDMenuItem, darkTheme, lightTheme, aboutMenuItem, emulator104MenuItem, cmdMenuItem,
-            openNetscan, openPutty;
+            openNetScan, openPutty;
     @FXML private TextFlow consoleTextFlow;
     @FXML private ScrollPane consolePane;
 
@@ -100,7 +100,7 @@ public class MainWindowController {
     // Переменные
     private String currentTheme;
     private String defaultStyleIpField;
-    private ObservableList<ObservableList<DataModel>> dataBaseList = FXCollections.observableArrayList();
+    private ObservableList<ObservableList<DataBaseDataModel>> dataBaseList = FXCollections.observableArrayList();
     private Integer analogAddressForChart;
     private LineChartController lineChartController;
     private boolean selectCmd;
@@ -221,7 +221,7 @@ public class MainWindowController {
         cmdMenuItem.setOnAction(event -> openCmdWindow());
         darkTheme.setOnAction(event -> switchTheme(DARK_THEME));
         lightTheme.setOnAction(event -> switchTheme(LIGHT_THEME));
-        openNetscan.setOnAction(event -> openApps(NETSCAN));
+        openNetScan.setOnAction(event -> openApps(NETSCAN));
         openPutty.setOnAction(event -> openApps(PUTTY));
     }
 
@@ -253,50 +253,50 @@ public class MainWindowController {
 
     /* Конфигурация таблиц */
     private void setupTableColumns() {
-        configureProtocolTableColumns();
+        configureStreamTableColumns();
         configureStaticTableColumns();
         configureDataBaseTableColumns();
 
-        protocolTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        streamTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dataBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         staticTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         dataBaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         dataCheckColumn.setStyle("-fx-alignment: CENTER;");
     }
 
-    private void configureProtocolTableColumns() {
-        protTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeProperty());
-        protTypeColumn.setCellValueFactory(cellData -> cellData.getValue().protTypeProperty());
-        protCauseColumn.setCellValueFactory(cellData -> cellData.getValue().protCauseProperty());
-        protAsduColumn.setCellValueFactory(cellData -> cellData.getValue().protAsduProperty().asObject());
-        protAddressColumn.setCellValueFactory(cellData -> cellData.getValue().protAddressProperty().asObject());
-        protValueColumn.setCellValueFactory(cellData -> cellData.getValue().protValueProperty());
-        protValueColumn.setCellFactory(tc -> setValueColumnStyle());
-        protQualityColumn.setCellValueFactory(cellData -> cellData.getValue().protQualityProperty());
-        protQualityColumn.setCellFactory(tc -> setQualityColumnStyle());
-        protTimeTagColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeTagProperty());
+    private void configureStreamTableColumns() {
+        streamTableTimeColumn.setCellValueFactory(cellData -> cellData.getValue().streamTimeProperty());
+        streamTableTypeColumn.setCellValueFactory(cellData -> cellData.getValue().streamTypeProperty());
+        streamTableCauseColumn.setCellValueFactory(cellData -> cellData.getValue().streamCauseProperty());
+        streamTableAsduColumn.setCellValueFactory(cellData -> cellData.getValue().streamAsduProperty().asObject());
+        streamTableAddressColumn.setCellValueFactory(cellData -> cellData.getValue().streamAddressProperty().asObject());
+        streamTableValueColumn.setCellValueFactory(cellData -> cellData.getValue().streamValueProperty());
+        streamTableValueColumn.setCellFactory(tc -> setValueColumnStyle());
+        streamTableQualityColumn.setCellValueFactory(cellData -> cellData.getValue().streamQualityProperty());
+        streamTableQualityColumn.setCellFactory(tc -> setQualityColumnStyle());
+        streamTableTimeTagColumn.setCellValueFactory(cellData -> cellData.getValue().streamTimeTagProperty());
     }
 
     private void configureStaticTableColumns() {
-        staticAsduColumn.setCellValueFactory(cellData -> cellData.getValue().protAsduProperty().asObject());
-        staticAddressColumn.setCellValueFactory(cellData -> cellData.getValue().protAddressProperty().asObject());
+        staticAsduColumn.setCellValueFactory(cellData -> cellData.getValue().streamAsduProperty().asObject());
+        staticAddressColumn.setCellValueFactory(cellData -> cellData.getValue().streamAddressProperty().asObject());
         staticNameColumn.setVisible(false);
-        staticTypeColumn.setCellValueFactory(cellData -> cellData.getValue().protTypeProperty());
-        staticCauseColumn.setCellValueFactory(cellData -> cellData.getValue().protCauseProperty());
-        staticValueColumn.setCellValueFactory(cellData -> cellData.getValue().protValueProperty());
+        staticTypeColumn.setCellValueFactory(cellData -> cellData.getValue().streamTypeProperty());
+        staticCauseColumn.setCellValueFactory(cellData -> cellData.getValue().streamCauseProperty());
+        staticValueColumn.setCellValueFactory(cellData -> cellData.getValue().streamValueProperty());
         staticValueColumn.setCellFactory(tc -> setValueColumnStyle());
         staticValueColumn.setCellFactory(tc -> setAnimatedValueColumnStyle());
-        staticQualityColumn.setCellValueFactory(cellData -> cellData.getValue().protQualityProperty());
+        staticQualityColumn.setCellValueFactory(cellData -> cellData.getValue().streamQualityProperty());
         staticQualityColumn.setCellFactory(tc -> setQualityColumnStyle());
-        staticTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeTagProperty());
-        staticClientTimeColumn.setCellValueFactory(cellData -> cellData.getValue().protTimeProperty());
+        staticTimeColumn.setCellValueFactory(cellData -> cellData.getValue().streamTimeTagProperty());
+        staticClientTimeColumn.setCellValueFactory(cellData -> cellData.getValue().streamTimeProperty());
     }
 
     private void configureDataBaseTableColumns() {
-        dataNameParamColumn.setCellValueFactory(cellData -> cellData.getValue().nameOfParamProperty());
-        dataIoaColumn.setCellValueFactory(cellData -> cellData.getValue().ioaProperty().asObject());
-        dataValueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
-        dataQualityColumn.setCellValueFactory(cellData -> cellData.getValue().qualityProperty());
+        dataNameParamColumn.setCellValueFactory(cellData -> cellData.getValue().dbNameOfParamProperty());
+        dataIoaColumn.setCellValueFactory(cellData -> cellData.getValue().dbIoaProperty().asObject());
+        dataValueColumn.setCellValueFactory(cellData -> cellData.getValue().dbValueProperty());
+        dataQualityColumn.setCellValueFactory(cellData -> cellData.getValue().dbQualityProperty());
         dataCheckColumn.setCellValueFactory(new PropertyValueFactory<>("check"));
     }
 
@@ -322,7 +322,7 @@ public class MainWindowController {
     }
 
     private void setupContextMenus() {
-        protocolTable.setContextMenu(tiContextMenu(protocolTable));
+        streamTable.setContextMenu(tiContextMenu(streamTable));
     }
 
     /* Обработчики выбора листов БД */
@@ -385,15 +385,15 @@ public class MainWindowController {
     }
 
     private void sendTuCommandWithDelay(boolean state) {
-        DataModel selectedItem = dataBaseTable.getSelectionModel().getSelectedItem();
+        DataBaseDataModel selectedItem = dataBaseTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            client104.sendTuCommand(commonAddressParam, selectedItem.getIoa(), true, state);
+            client104.sendTuCommand(commonAddressParam, selectedItem.getDbIoaProperty(), true, state);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            client104.sendTuCommand(commonAddressParam, selectedItem.getIoa(), false, state);
+            client104.sendTuCommand(commonAddressParam, selectedItem.getDbIoaProperty(), false, state);
         }
     }
 
@@ -574,7 +574,7 @@ public class MainWindowController {
         initializeExcelFile(dataBaseList);
     }
 
-    private void initializeExcelFile(ObservableList<ObservableList<DataModel>> dataBaseList) {
+    private void initializeExcelFile(ObservableList<ObservableList<DataBaseDataModel>> dataBaseList) {
         if (dataBaseList != null) {
             updateUIForSuccessfulFileOpen();
             initDataBase(dataBaseList.get(0));
@@ -655,8 +655,8 @@ public class MainWindowController {
     }
 
     /* Стили ячеек таблицы */
-    private TextFieldTableCell<ProtocolDataModel, String> setValueColumnStyle() {
-        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+    private TextFieldTableCell<StreamDataModel, String> setValueColumnStyle() {
+        TextFieldTableCell<StreamDataModel, String> cell = new TextFieldTableCell<>();
         cell.itemProperty().addListener((obs, oldItem, newItem) -> {
             cell.setStyle("-fx-background-color: transparent");
             if (newItem != null) {
@@ -666,14 +666,14 @@ public class MainWindowController {
         return cell;
     }
 
-    private TextFieldTableCell<ProtocolDataModel, String> setAnimatedValueColumnStyle() {
-        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+    private TextFieldTableCell<StreamDataModel, String> setAnimatedValueColumnStyle() {
+        TextFieldTableCell<StreamDataModel, String> cell = new TextFieldTableCell<>();
         cell.itemProperty().addListener((obs, oldItem, newItem) -> {
             if ((oldItem == null && newItem == null) || (oldItem != null && oldItem.equals(newItem))) {
                 return;
             }
 
-            ProtocolDataModel rowData = cell.getTableRow() != null ? (ProtocolDataModel) cell.getTableRow().getItem() : null;
+            StreamDataModel rowData = cell.getTableRow() != null ? (StreamDataModel) cell.getTableRow().getItem() : null;
             if (rowData == null || !rowData.isNewlyAdded()) {
                 return;
             }
@@ -683,7 +683,7 @@ public class MainWindowController {
         return cell;
     }
 
-    private void animateCell(TextFieldTableCell<ProtocolDataModel, String> cell, String newItem) {
+    private void animateCell(TextFieldTableCell<StreamDataModel, String> cell, String newItem) {
         if (newItem != null) {
             cell.getStyleClass().add("animated-gradient");
             ObjectProperty<Color> baseColor = new SimpleObjectProperty<>();
@@ -707,7 +707,7 @@ public class MainWindowController {
         }
     }
 
-    private void setTSCellColor(String newItem, TextFieldTableCell<ProtocolDataModel, String> cell) {
+    private void setTSCellColor(String newItem, TextFieldTableCell<StreamDataModel, String> cell) {
         String style;
         switch (newItem) {
             case "ON":
@@ -727,8 +727,8 @@ public class MainWindowController {
         cell.setStyle(style);
     }
 
-    private TextFieldTableCell<ProtocolDataModel, String> setQualityColumnStyle() {
-        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+    private TextFieldTableCell<StreamDataModel, String> setQualityColumnStyle() {
+        TextFieldTableCell<StreamDataModel, String> cell = new TextFieldTableCell<>();
         cell.itemProperty().addListener((obs, oldItem, newItem) -> {
             cell.setStyle("-fx-background-color: transparent");
             if (newItem != null) {
@@ -813,17 +813,17 @@ public class MainWindowController {
 
     /* Методы для графиков */
     private void startLineChart(TableView tableView) {
-        if (tableView.equals(protocolTable)) {
-            handleProtocolTableChart();
+        if (tableView.equals(streamTable)) {
+            handleStreamTableChart();
         } else {
             handleDataBaseTableChart();
         }
     }
 
-    private void handleProtocolTableChart() {
-        ProtocolDataModel selectedItem = protocolTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null && isAnalogValue(selectedItem.getProtType())) {
-            analogAddressForChart = selectedItem.getProtAddress();
+    private void handleStreamTableChart() {
+        StreamDataModel selectedItem = streamTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null && isAnalogValue(selectedItem.getStreamTypeProperty())) {
+            analogAddressForChart = selectedItem.getStreamAddressProperty();
             openLineChartWindow();
         } else {
             printConsoleInfoMessage("Просмотр графика доступен только для аналоговых значений");
@@ -836,9 +836,9 @@ public class MainWindowController {
     }
 
     private void handleDataBaseTableChart() {
-        DataModel selectedItem = dataBaseTable.getSelectionModel().getSelectedItem();
+        DataBaseDataModel selectedItem = dataBaseTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            analogAddressForChart = selectedItem.getIoa();
+            analogAddressForChart = selectedItem.getDbIoaProperty();
             openLineChartWindow();
         }
     }
@@ -858,9 +858,9 @@ public class MainWindowController {
         }
     }
 
-    public void addLineChartPoint(ProtocolDataModel protocolDataModel) {
+    public void addLineChartPoint(StreamDataModel streamDataModel) {
         if (lineChartController != null) {
-            lineChartController.addLineChartPoint(protocolDataModel, analogAddressForChart);
+            lineChartController.addLineChartPoint(streamDataModel, analogAddressForChart);
         }
     }
 
@@ -899,12 +899,12 @@ public class MainWindowController {
     @FXML
     private void clearDataTable() {
         staticTable.setItems(FXCollections.observableArrayList());
-        protocolTable.setItems(FXCollections.observableArrayList());
+        streamTable.setItems(FXCollections.observableArrayList());
         client104.clearDataTable();
     }
 
-    private TextFieldTableCell<ProtocolDataModel, String> createTransparentCell() {
-        TextFieldTableCell<ProtocolDataModel, String> cell = new TextFieldTableCell<>();
+    private TextFieldTableCell<StreamDataModel, String> createTransparentCell() {
+        TextFieldTableCell<StreamDataModel, String> cell = new TextFieldTableCell<>();
         cell.setStyle("-fx-background-color: transparent");
         return cell;
     }
@@ -989,29 +989,29 @@ public class MainWindowController {
     }
 
     /* Методы инициализации данных */
-    public void initDataBase(ObservableList<DataModel> dataModelObservableList) {
+    public void initDataBase(ObservableList<DataBaseDataModel> dataBaseDataModelObservableList) {
         try {
-            dataBaseTable.setItems(dataModelObservableList);
+            dataBaseTable.setItems(dataBaseDataModelObservableList);
         } catch (NullPointerException e) {
             printConsoleErrorMessage("Ошибка при инициализации базы данных: " + e.getMessage());
         }
     }
 
-    public void initialize(ObservableList<ProtocolDataModel> dataModelObservableList) {
+    public void initialize(ObservableList<StreamDataModel> dataModelObservableList) {
         try {
-            FilteredList<ProtocolDataModel> filteredList = new FilteredList<>(dataModelObservableList, p -> true);
+            FilteredList<StreamDataModel> filteredList = new FilteredList<>(dataModelObservableList, p -> true);
             setupFiltering(filteredList);
 
-            SortedList<ProtocolDataModel> sortedDataList = new SortedList<>(filteredList);
-            sortedDataList.comparatorProperty().bind(protocolTable.comparatorProperty());
-            protocolTable.setItems(sortedDataList);
+            SortedList<StreamDataModel> sortedDataList = new SortedList<>(filteredList);
+            sortedDataList.comparatorProperty().bind(streamTable.comparatorProperty());
+            streamTable.setItems(sortedDataList);
         } catch (NullPointerException e) {
             printConsoleErrorMessage("Ошибка при инициализации протокола: " + e.getMessage());
         }
-        protocolTable.setContextMenu(tiContextMenu(protocolTable));
+        streamTable.setContextMenu(tiContextMenu(streamTable));
     }
 
-    private void setupFiltering(FilteredList<ProtocolDataModel> filteredList) {
+    private void setupFiltering(FilteredList<StreamDataModel> filteredList) {
         filterTypeCheckBox.selectedProperty().addListener(event ->
                 filteredList.setPredicate(this::setIOAFilter));
 
@@ -1021,40 +1021,40 @@ public class MainWindowController {
         filteredList.setPredicate(this::setIOAFilter);
     }
 
-    private boolean setIOAFilter(ProtocolDataModel protocolDataModel) {
+    private boolean setIOAFilter(StreamDataModel streamDataModel) {
         String filterText = filterField.getText();
         if (filterText == null || filterText.isEmpty()) {
             return true;
         }
-        String ioa = String.valueOf(protocolDataModel.getProtAddress());
+        String ioa = String.valueOf(streamDataModel.getStreamAddressProperty());
         return filterTypeCheckBox.isSelected() ?
                 ioa.contains(filterText) :
                 ioa.equals(filterText);
     }
 
-    public void initStaticData(ObservableList<ProtocolDataModel> dataModelObservableList) {
+    public void initStaticData(ObservableList<StreamDataModel> dataModelObservableList) {
         try {
             staticTable.setItems(dataModelObservableList);
         } catch (NullPointerException e) {
             printConsoleErrorMessage("Ошибка при инициализации статических данных: " + e.getMessage());
         }
-        protocolTable.setContextMenu(tiContextMenu(protocolTable));
+        streamTable.setContextMenu(tiContextMenu(streamTable));
     }
 
-    public void initSingleStaticData(ObservableList<ProtocolDataModel> dataModelObservableList) {
+    public void initSingleStaticData(ObservableList<StreamDataModel> dataModelObservableList) {
         try {
             staticTable.setItems(dataModelObservableList);
         } catch (NullPointerException e) {
             printConsoleErrorMessage("Ошибка при инициализации единичных статических данных: " + e.getMessage());
         }
-        protocolTable.setContextMenu(tiContextMenu(protocolTable));
+        streamTable.setContextMenu(tiContextMenu(streamTable));
     }
 
     public Tab getDataTab() {
         return dataTab;
     }
 
-    public ObservableList<ObservableList<DataModel>> getDataBaseList() {
+    public ObservableList<ObservableList<DataBaseDataModel>> getDataBaseList() {
         return dataBaseList;
     }
 

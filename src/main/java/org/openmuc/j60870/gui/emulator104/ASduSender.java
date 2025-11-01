@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.util.Duration;
 import org.openmuc.j60870.*;
-import org.openmuc.j60870.gui.model.ServerModel;
+import org.openmuc.j60870.gui.models.ServerModel;
 import org.openmuc.j60870.ie.*;
 
 import java.io.EOFException;
